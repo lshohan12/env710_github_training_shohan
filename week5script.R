@@ -1,10 +1,13 @@
-Lauren
-Weilin
-Jessalyn
+#Lauren
+#Weilin
+#Jessalyn
 
-Feb 12
+#Feb12
 
-Orange and green
+#Orange and green
+
+new_variable <- 8
+
 
 
 
