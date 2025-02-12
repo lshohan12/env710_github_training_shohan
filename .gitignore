@@ -1,0 +1,9 @@
+
+#ignoring .Rproj file
+# so it doesnt intefere with other peoples computers
+*.Rproj
+
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
