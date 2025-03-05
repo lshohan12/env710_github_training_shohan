@@ -1,0 +1,32 @@
+---
+title: "Stat_Figures"
+output: pdf_document
+date: "2025-03-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(here)
+library(lubridate)
+library(tidyverse)
+library(readxl)
+library(openxlsx)
+#reading in egrid 2022 data
+egrid_data <- read.xlsx(xlsxFile="./Datafiles/egrid2022_data.xlsx",sheet = "PLNT22")
+
+#ozone level recordings for all 7 states in 2022
+ozone_FL_data <- read.csv('./Datafiles/ozone_FL.csv',stringsAsFactors = TRUE)
+ozone_GA_data <- read.csv('./Datafiles/ozone_GA.csv',stringsAsFactors = TRUE)
+ozone_MS_data <- read.csv('./Datafiles/ozone_MS.csv',stringsAsFactors = TRUE)
+ozone_NC_data <- read.csv('./Datafiles/ozone_NC.csv',stringsAsFactors = TRUE)
+ozone_SC_data <- read.csv('./Datafiles/ozone_SC.csv',stringsAsFactors = TRUE)
+ozone_TN_data <- read.csv('./Datafiles/ozone_TN.csv',stringsAsFactors = TRUE)
+ozone_AL_data <- read.csv('./Datafiles/ozone_AL.csv',stringsAsFactors = TRUE)
+
+
+```
+
