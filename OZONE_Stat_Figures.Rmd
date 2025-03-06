@@ -20,6 +20,15 @@ library(dplyr)
 egrid_data <- read.xlsx(xlsxFile="./Datafiles/egrid2022_data.xlsx",sheet = "PLNT22")
 egrid_data$Plant.FIPS.county.code <- as.numeric(egrid_data$Plant.FIPS.county.code)
 egrid_data$`Plant.nameplate.capacity.(MW)` <- as.numeric(egrid_data$`Plant.nameplate.capacity.(MW)`)
+
+
+#created a dataframe with column name definitions
+egrid_names <- egrid_data[1,]
+egrid_names <- egrid_names %>%
+  mutate(across(everything(), as.character)) %>%
+  pivot_longer(cols = everything() ,names_to = 'Definition', values_to = 'Abbrev') 
+  
+```
 ```
 
 # Loading in Ozone Concentration Data for all 7 States
@@ -74,12 +83,15 @@ Heili notes - #facet grid
 # Florida 
 ## FLORIDA WINTER
 ### Data Wrangling
+
+
 ```{r}
 # data wrangling
 
-#Egrid Florida data
+#Egrid data
 egrid_data_FL_counties <- egrid_data %>%
   filter(Plant.state.abbreviation == 'FL') %>% 
+  filter(Plantprimar)
   relocate(Plant.FIPS.county.code, 
            Plant.county.name, `Plant.nameplate.capacity.(MW)`) %>% #so i can see what im working with
   select(Plant.FIPS.county.code, 
@@ -90,7 +102,7 @@ egrid_data_FL_counties <- egrid_data %>%
   summarize(Mean_Plant_Nameplate_CapacityMW = mean(`Plant.nameplate.capacity.(MW)`)) %>%
   ungroup()
 
-#Florida 
+#Winter ozone data 
 winter_ozone_FL_data <-ozone_FL_data %>%
   filter(Month == 1) %>% #january
   group_by(County, County.FIPS.Code) %>%
@@ -108,21 +120,22 @@ FL_winter_ozone_egrid <- merge(egrid_data_FL_counties, winter_ozone_FL_data, by 
 #graphs
 
 #by mean ozone concentration on y and nameplate on x
-FL_winter_ozone_fig1 <- FL_winter_ozone_egrid %>%
+FL_winter_ozone_concen_fig <- FL_winter_ozone_egrid %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = average_month_ozone_concentration)) +
    geom_jitter() +
+  scale_x_log10() +
   labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average Ozone Concentrations by Counties (unit)',
        title = 'Florida Average Nameplate Capacities and \n Ozone Concentrations by County in January ')
- FL_winter_ozone_fig1
+ FL_winter_ozone_concen_fig
  
  #AQI .. same graph as above but on different time scales on Y .. so may be easier to read AQI ? not sure
- FL_winter_ozone_fig2 <- FL_winter_ozone_egrid %>%
+ FL_winter_ozone_AQI <- FL_winter_ozone_egrid %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
    geom_jitter() +
-   scale_x_log10() + #can set ticks / break points 
+   scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
   labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average AQI (unit)',
        title = 'Florida Average Nameplate Capacities and \n Ozone AQI by County in January ')
- FL_winter_ozone_fig2
+ FL_winter_ozone_AQI
 
 ```
 
@@ -145,20 +158,22 @@ FL_summer_ozone_egrid <- merge(egrid_data_FL_counties, summer_ozone_FL_data, by 
 ### Graphs
 ```{r}
 #by mean ozone concentration on y and nameplate on x
-FL_summer_ozone_fig1 <- FL_summer_ozone_egrid %>%
+FL_summer_ozone_concen <- FL_summer_ozone_egrid %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = average_month_ozone_concentration)) +
    geom_jitter() +
+  scale_x_log10() +
   labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average Ozone Concentrations by Counties (unit)',
        title = 'Florida Average Nameplate Capacities and \n Ozone Concentrations by County in July ')
- FL_summer_ozone_fig1
+ FL_summer_ozone_concen
  
  #AQI .. same graph as above but on different time scales on Y .. so may be easier to read AQI ? not sure
- FL_summer_ozone_fig2 <- FL_summer_ozone_egrid %>%
+ FL_summer_ozone_AQI <- FL_summer_ozone_egrid %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
    geom_jitter() +
+   scale_x_log10() +
   labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average AQI (unit)',
        title = 'Florida Average Nameplate Capacities and \n Ozone AQI by County in July ')
- FL_summer_ozone_fig2
+ FL_summer_ozone_AQI
 ```
 
 
