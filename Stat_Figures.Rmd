@@ -106,15 +106,19 @@ FL_winter_ozone_fig1 <- FL_winter_ozone_egrid %>%
  FL_winter_ozone_fig2 <- FL_winter_ozone_egrid %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
    geom_jitter() +
+   scale_x_log10() + #can set ticks / break points 
   labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average AQI (unit)',
        title = 'Florida Average Nameplate Capacities and \n Ozone AQI by County in January ')
  FL_winter_ozone_fig2
 
+#facet grid 
+  #scales = fixed vs free
+#patchwork () 
  
 #by county just for fun
-#FL_winter_ozone_fig2 <- FL_winter_ozone_egrid %>%
-#  ggplot(aes(x = County, y = average_month_ozone_concentration)) +
-#  geom_jitter()
+FL_winter_ozone_fig3 <- FL_winter_ozone_egrid %>%
+  ggplot(aes(x = County, y = average_month_ozone_concentration)) +
+  geom_jitter()
 ```
 
 ##rest of states
