@@ -13,9 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 library(here)
 library(lubridate)
 library(tidyverse)
-library(readxl)
-library(openxlsx)
+library(readxl); library(openxlsx)
 library(dplyr)
+library(ggplot2); library(patchwork)
 #reading in egrid 2022 data
 egrid_data <- read.xlsx(xlsxFile="./Datafiles/egrid2022_data.xlsx",sheet = "PLNT22")
 egrid_data$Plant.FIPS.county.code <- as.numeric(egrid_data$Plant.FIPS.county.code)
@@ -27,8 +27,12 @@ egrid_names <- egrid_data[1,]
 egrid_names <- egrid_names %>%
   mutate(across(everything(), as.character)) %>%
   pivot_longer(cols = everything() ,names_to = 'Definition', values_to = 'Abbrev') 
-  
-```
+
+#filtering
+egrid_data <- egrid_data %>%
+  filter(!row_number() %in% c(1)) %>% #filtering out first row with names
+  filter(Plant.primary.fuel.category %in% c('BIOMASS','GAS','COAL','OIL','OFSL','OTHF'))
+
 ```
 
 # Loading in Ozone Concentration Data for all 7 States
@@ -91,7 +95,6 @@ Heili notes - #facet grid
 #Egrid data
 egrid_data_FL_counties <- egrid_data %>%
   filter(Plant.state.abbreviation == 'FL') %>% 
-  filter(Plantprimar)
   relocate(Plant.FIPS.county.code, 
            Plant.county.name, `Plant.nameplate.capacity.(MW)`) %>% #so i can see what im working with
   select(Plant.FIPS.county.code, 
@@ -174,6 +177,13 @@ FL_summer_ozone_concen <- FL_summer_ozone_egrid %>%
   labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average AQI (unit)',
        title = 'Florida Average Nameplate Capacities and \n Ozone AQI by County in July ')
  FL_summer_ozone_AQI
+```
+```{r}
+#FLORIDA GRAPHS
+# cool patchwork feature Heili told me about!! wow
+
+FL_summer_ozone_AQI + FL_winter_ozone_AQI
+
 ```
 
 
