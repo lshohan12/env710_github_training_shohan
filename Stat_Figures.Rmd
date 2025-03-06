@@ -8,25 +8,192 @@ date: "2025-03-05"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
+# Loading in main EGrid Data
 ```{r}
 library(here)
 library(lubridate)
 library(tidyverse)
 library(readxl)
 library(openxlsx)
+library(dplyr)
 #reading in egrid 2022 data
 egrid_data <- read.xlsx(xlsxFile="./Datafiles/egrid2022_data.xlsx",sheet = "PLNT22")
+egrid_data$Plant.FIPS.county.code <- as.numeric(egrid_data$Plant.FIPS.county.code)
+egrid_data$`Plant.nameplate.capacity.(MW)` <- as.numeric(egrid_data$`Plant.nameplate.capacity.(MW)`)
+```
 
+# Loading in Ozone Concentration Data for all 7 States
+```{r}
 #ozone level recordings for all 7 states in 2022
-ozone_FL_data <- read.csv('./Datafiles/ozone_FL.csv',stringsAsFactors = TRUE)
-ozone_GA_data <- read.csv('./Datafiles/ozone_GA.csv',stringsAsFactors = TRUE)
-ozone_MS_data <- read.csv('./Datafiles/ozone_MS.csv',stringsAsFactors = TRUE)
-ozone_NC_data <- read.csv('./Datafiles/ozone_NC.csv',stringsAsFactors = TRUE)
-ozone_SC_data <- read.csv('./Datafiles/ozone_SC.csv',stringsAsFactors = TRUE)
-ozone_TN_data <- read.csv('./Datafiles/ozone_TN.csv',stringsAsFactors = TRUE)
-ozone_AL_data <- read.csv('./Datafiles/ozone_AL.csv',stringsAsFactors = TRUE)
+#Florida 
+ozone_FL_data <- read.csv('./Datafiles/ozone_FL.csv')
+ozone_FL_data$Date <- as.Date(ozone_FL_data$Date, format = "%m/%d/%Y") #converting Date into date
+ozone_FL_data <- ozone_FL_data %>% mutate(Month = month(Date)) #making a column with Month number
 
+#Georgia
+ozone_GA_data <- read.csv('./Datafiles/ozone_GA.csv')
+ozone_GA_data$Date <- as.Date(ozone_GA_data$Date, format = "%m/%d/%Y")
+ozone_GA_data <- ozone_GA_data %>% mutate(Month = month(Date))
+
+#Mississippi 
+ozone_MS_data <- read.csv('./Datafiles/ozone_MS.csv')
+ozone_MS_data$Date <- as.Date(ozone_MS_data$Date, format = "%m/%d/%Y")
+ozone_MS_data <- ozone_MS_data %>% mutate(Month = month(Date))
+
+#North Carolina
+ozone_NC_data <- read.csv('./Datafiles/ozone_NC.csv')
+ozone_NC_data$Date <- as.Date(ozone_NC_data$Date, format = "%m/%d/%Y")
+ozone_NC_data <- ozone_NC_data %>% mutate(Month = month(Date))
+
+#South Carolina
+ozone_SC_data <- read.csv('./Datafiles/ozone_SC.csv')
+ozone_SC_data$Date <- as.Date(ozone_SC_data$Date, format = "%m/%d/%Y")
+ozone_SC_data <- ozone_SC_data %>% mutate(Month = month(Date))
+
+#Tennesse
+ozone_TN_data <- read.csv('./Datafiles/ozone_TN.csv')
+ozone_TN_data$Date <- as.Date(ozone_TN_data$Date, format = "%m/%d/%Y")
+ozone_TN_data <- ozone_TN_data %>% mutate(Month = month(Date))
+
+#Alabama
+ozone_AL_data <- read.csv('./Datafiles/ozone_AL.csv')
+ozone_AL_data$Date <- as.Date(ozone_AL_data$Date, format = "%m/%d/%Y")
+ozone_AL_data <- ozone_AL_data %>% mutate(Month = month(Date))
+
+```
+
+# Winter Data (December)
+## Florida 
+```{r}
+#Winter data sets
+#January (coldest month in South)
+
+
+#Egrid Florida data
+egrid_data_FL_counties <- egrid_data %>%
+  filter(Plant.state.abbreviation == 'FL') %>% 
+  relocate(Plant.FIPS.county.code, 
+           Plant.county.name, `Plant.nameplate.capacity.(MW)`) %>% #so i can see what im working with
+  select(Plant.FIPS.county.code, 
+         Plant.county.name,
+         `Plant.nameplate.capacity.(MW)`) %>% #only important ones i think
+  rename(County.FIPS.Code = Plant.FIPS.county.code) %>% #to merge egrid & ozone data frames by common col
+  group_by(County.FIPS.Code, Plant.county.name) %>% #change group by to new column name
+  summarize(Mean_Plant_Nameplate_CapacityMW = mean(`Plant.nameplate.capacity.(MW)`)) %>%
+  ungroup()
+
+#Florida 
+winter_ozone_FL_data <-ozone_FL_data %>%
+  filter(Month == 1) %>% #january
+  group_by(County, County.FIPS.Code) %>%
+  summarize(average_month_ozone_concentration = mean(Daily.Max.8.hour.Ozone.Concentration),
+            Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
+  ungroup()
+
+
+#now combining the two data frames
+FL_winter_ozone_egrid <- merge(egrid_data_FL_counties, winter_ozone_FL_data, by = 'County.FIPS.Code')
+
+#by mean ozone concentration on y and nameplate on x
+FL_winter_ozone_fig1 <- FL_winter_ozone_egrid %>%
+  ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = average_month_ozone_concentration)) +
+   geom_jitter() +
+  labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average Ozone Concentrations by Counties (unit)',
+       title = 'Florida Average Nameplate Capacities and \n Ozone Concentrations by County in January ')
+ FL_winter_ozone_fig1
+ 
+ #AQI .. same graph as above but on different time scales on Y .. so may be easier to read AQI ? not sure
+ FL_winter_ozone_fig2 <- FL_winter_ozone_egrid %>%
+  ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
+   geom_jitter() +
+  labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average AQI (unit)',
+       title = 'Florida Average Nameplate Capacities and \n Ozone AQI by County in January ')
+ FL_winter_ozone_fig2
+
+ 
+#by county just for fun
+#FL_winter_ozone_fig2 <- FL_winter_ozone_egrid %>%
+#  ggplot(aes(x = County, y = average_month_ozone_concentration)) +
+#  geom_jitter()
+```
+
+##rest of states
+```{r}
+#winter continued ...
+
+#Georgia
+winter_ozone_GA_data<-ozone_GA_data
+
+#Mississippi 
+winter_ozone_MS_data<-ozone_MS_data
+
+#North Carolina
+winter_ozone_NC_data<-ozone_NC_data
+
+#South Carolina
+winter_ozone_SC_data<-ozone_SC_data
+
+#Tennessee
+winter_ozone_TN_data<-ozone_TN_data
+
+#Alabama
+winter_ozone_AL_data<-ozone_AL_data
+
+```
+
+# Summer Data (July)
+
+```{r}
+#Summer data sets
+#July (hottest month in the south)
+
+#Florida 
+summer_ozone_FL_data <-ozone_FL_data %>%
+  filter(Month == 7) %>% #july
+  group_by(County, County.FIPS.Code) %>%
+  summarize(average_month_ozone_concentration = mean(Daily.Max.8.hour.Ozone.Concentration),
+            Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
+  ungroup()
+
+#now combining the two data frames
+FL_summer_ozone_egrid <- merge(egrid_data_FL_counties, summer_ozone_FL_data, by = 'County.FIPS.Code')
+
+#by mean ozone concentration on y and nameplate on x
+FL_summer_ozone_fig1 <- FL_summer_ozone_egrid %>%
+  ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = average_month_ozone_concentration)) +
+   geom_jitter() +
+  labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average Ozone Concentrations by Counties (unit)',
+       title = 'Florida Average Nameplate Capacities and \n Ozone Concentrations by County in July ')
+ FL_summer_ozone_fig1
+ 
+ #AQI .. same graph as above but on different time scales on Y .. so may be easier to read AQI ? not sure
+ FL_summer_ozone_fig2 <- FL_summer_ozone_egrid %>%
+  ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
+   geom_jitter() +
+  labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average AQI (unit)',
+       title = 'Florida Average Nameplate Capacities and \n Ozone AQI by County in July ')
+ FL_summer_ozone_fig2
+```
+
+
+```{r}
+#Georgia
+summer_ozone_GA_data<-ozone_GA_data
+
+#Mississippi 
+summer_ozone_MS_data<-ozone_MS_data
+
+#North Carolina
+summer_ozone_NC_data<-ozone_NC_data
+
+#South Carolina
+summer_ozone_SC_data<-ozone_SC_data
+
+#Tennesse
+summer_ozone_TN_data<-ozone_TN_data
+
+#Alabama
+summer_ozone_AL_data<-ozone_AL_data
 
 ```
 
