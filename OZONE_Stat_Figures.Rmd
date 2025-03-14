@@ -2,6 +2,8 @@
 title: "Stat_Figures"
 output: pdf_document
 date: "2025-03-05"
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -142,8 +144,8 @@ FL_winter_ozone_concen_fig <- FL_winter_ozone_egrid %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
    geom_jitter() +
    scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
-  labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average AQI (unit)',
-       title = 'Florida Average Nameplate Capacities and \n Ozone AQI by County in January ')
+  labs(x = 'Average Nameplate Capacity (MW)', y = 'Average Ozone AQI',
+       title = 'January')
  FL_winter_ozone_AQI
 
 ```
@@ -180,15 +182,20 @@ FL_summer_ozone_concen <- FL_summer_ozone_egrid %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
    geom_jitter() +
    scale_x_log10() +
-  labs(x = 'Mean Nameplate Capacities of Florida Counties (MW)', y = 'Average AQI (unit)',
-       title = 'Florida Average Nameplate Capacities and \n Ozone AQI by County in July ')
+  labs(x = 'Average Nameplate Capacity (MW)', y = 'Average Ozone AQI',
+       title = 'July ')
  FL_summer_ozone_AQI
 ```
 ```{r}
 #FLORIDA GRAPHS
 # cool patchwork feature Heili told me about!! wow
 
-FL_summer_ozone_AQI + FL_winter_ozone_AQI
+FL_winter_ozone_AQI + FL_summer_ozone_AQI +
+    plot_layout(axes = 'collect') + #to consolidate x axis titles 
+  plot_annotation(tag_levels = 'A') +
+  plot_annotation('2022 Average Nameplate Capacities and Ozone AQI \n for Florida Counties in January and July', 
+                  caption = 'These two plots show the combined average nameplate capacities for coal-burning power plants \n averaged by Florida counties compared with the average EPA Ozone Air Quality Index \n of the specified month in those counties. Plot A shows the average Ozone AQI \n in January and Plot B shows AQI in July. ') 
+  
 
 ```
 
@@ -242,7 +249,7 @@ summer_ozone_AL_data<-ozone_AL_data
 
 ```
 
-#Summer - Combined chart of counties
+# Summer - Combined chart of ALL counties
 
 ```{r}
 #Data wrangling for ozone
@@ -286,14 +293,14 @@ all_summer_ozone_concen_fig
  all_summer_ozone_AQI <- summer_ozone_egrid_all %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
    geom_jitter() +
-   scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
-  labs(x = 'Mean Nameplate Capacities of all Counties (MW)', y = 'Average AQI (unit)',
-       title = 'Average Nameplate Capacities and \n Ozone AQI by County in July ')
+   #scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
+  labs(x = 'Average County Nameplate Capacity (MW)', y = 'Average Ozone AQI',
+       title = 'July ')
  all_summer_ozone_AQI
 ```
 
 
-#Winter - Combined chart of counties
+# Winter - Combined chart of ALL counties
 ```{r}
 #Data wrangling for ozone
 
@@ -324,16 +331,22 @@ all_winter_ozone_concen_fig
  all_winter_ozone_AQI <- winter_ozone_egrid_all %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
    geom_jitter() +
-   scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
-  labs(x = 'Mean Nameplate Capacities of all Counties (MW)', y = 'Average AQI (unit)',
-       title = 'Average Nameplate Capacities and \n Ozone AQI by County in January ')
+   #scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
+  labs(x = 'Average County Nameplate Capacity (MW)', y = 'Average Ozone AQI',
+       title = 'January ')
  all_winter_ozone_AQI
 ```
 
 ```{r}
-#FLORIDA GRAPHS
-# cool patchwork feature Heili told me about!! wow
+#All counties GRAPHS
 
-all_summer_ozone_AQI + all_winter_ozone_AQI
+all_winter_ozone_AQI + all_summer_ozone_AQI + 
+  plot_layout(axes = 'collect') + #to consolidate x axis titles 
+  plot_annotation(tag_levels = 'A') +
+  plot_annotation('2022 Average Nameplate Capacities and Ozone AQI \n for All Counties in January and July', 
+                  caption = 'These two plots show the combined average nameplate capacities for coal-burning power plants \n averaged by counties in 7 Southeastern states compared with the average EPA Ozone Air Quality Index \n of the specified month. Plot A shows the average Ozone AQI in January and Plot B shows AQI in July. ') 
+  
+
+#different y ranges which visually isnt great - can change later
 
 ```
