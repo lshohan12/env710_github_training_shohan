@@ -143,7 +143,7 @@ FL_winter_ozone_concen_fig <- FL_winter_ozone_egrid %>%
  FL_winter_ozone_AQI <- FL_winter_ozone_egrid %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
    geom_jitter() +
-   scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
+   #scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
   labs(x = 'Average Nameplate Capacity (MW)', y = 'Average Ozone AQI',
        title = 'January')
  FL_winter_ozone_AQI
@@ -181,7 +181,7 @@ FL_summer_ozone_concen <- FL_summer_ozone_egrid %>%
  FL_summer_ozone_AQI <- FL_summer_ozone_egrid %>%
   ggplot(aes(x = Mean_Plant_Nameplate_CapacityMW, y = Average_Month_AQI_Value)) +
    geom_jitter() +
-   scale_x_log10() +
+   #scale_x_log10() +
   labs(x = 'Average Nameplate Capacity (MW)', y = 'Average Ozone AQI',
        title = 'July ')
  FL_summer_ozone_AQI
