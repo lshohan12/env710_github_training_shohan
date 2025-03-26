@@ -1,0 +1,88 @@
+---
+title: "agri_data"
+output: pdf_document
+date: "2025-03-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library(rvest)
+library(dataRetrieval)
+library(tidycensus)
+library(tidyverse);library(lubridate);library(viridis);library(here)
+here()
+```
+
+### Using `tidycensus` to extract census data
+The `tidycensus` package uses the Census' API to pull data into our coding environment. To use it, however, you first need to get a free Census API key at <https://api.census.gov/data/key_signup.html>. After that, it's pretty easy to fetch data into your coding environment. 
+
+We'll use it to extract total population of counties in NC. 
+
+You'll also need to look up the IDs of the variables you want to extract. Those are found here:
+<https://walker-data.com/tidycensus/articles/basic-usage.html#searching-for-variables>
+
+
+```{r}
+# population data by county for all the states
+
+#Apply the API key
+census_api_key("d4ad7874c996c7a83fec0a81466309ddc07d8e22a", install = TRUE)
+
+v17 <- load_variables(2022, 'acs5', cache = TRUE)
+v17
+
+AL_pop <- 
+  get_acs(geography = "county",
+          state = "AL",
+          variables = 'B01001_001',
+          year = 2022) #gives back spatial features
+
+FL_pop <- 
+  get_acs(geography = "county",
+          state = "FL",
+          variables = 'B01001_001',
+          year = 2022) #gives back spatial features
+
+GA_pop <- 
+  get_acs(geography = "county",
+          state = "GA",
+          variables = 'B01001_001',
+          year = 2022) #gives back spatial features
+
+MS_pop <- 
+  get_acs(geography = "county",
+          state = "MS",
+          variables = 'B01001_001',
+          year = 2022) #gives back spatial features
+
+NC_pop <- 
+  get_acs(geography = "county",
+          state = "NC",
+          variables = 'B01001_001',
+          year = 2022) #gives back spatial features
+
+SC_pop <- 
+  get_acs(geography = "county",
+          state = "SC",
+          variables = 'B01001_001',
+          year = 2022) #gives back spatial features
+
+TN_pop <- 
+  get_acs(geography = "county",
+          state = "TN",
+          variables = 'B01001_001',
+          year = 2022) #gives back spatial features
+
+```
+
+
+```{r}
+#find another variable 
+
+
+```
+
