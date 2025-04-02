@@ -121,9 +121,6 @@ winter_ozone_FL_data <-ozone_FL_data %>%
 
 #now combining the two data frames
 FL_winter_ozone_egrid <- merge(egrid_data_FL_counties, winter_ozone_FL_data, by = 'County.FIPS.Code')
-
-#Saving this to Processed_Data so we can work with it later
-write.csv(FL_winter_ozone_egrid, file = "FL_winter_ozone_egrid.csv", row.names = FALSE)
 ```
 
 ### Graphs
@@ -267,14 +264,15 @@ egrid_data_counties_all <- egrid_data %>%
            Plant.county.name, `Plant.nameplate.capacity.(MW)`) %>% #so i can see what im working with
   select(Plant.FIPS.county.code, 
          Plant.county.name,
-         `Plant.nameplate.capacity.(MW)`) %>% #only important ones i think
+         `Plant.nameplate.capacity.(MW)`, `Plant.state.abbreviation`) %>% #only important ones i think
   rename(County.FIPS.Code = Plant.FIPS.county.code) %>% #to merge egrid & ozone data frames by common col
-  group_by(County.FIPS.Code, Plant.county.name) %>% #change group by to new column name
+  group_by(County.FIPS.Code, Plant.county.name, Plant.state.abbreviation) %>% #change group by to new column name
   summarize(Mean_Plant_Nameplate_CapacityMW = mean(`Plant.nameplate.capacity.(MW)`)) %>%
   ungroup()
 
 #now combining the two data frames
 summer_ozone_egrid_all <- merge(egrid_data_counties_all, summer_ozone_data_all, by = 'County.FIPS.Code')
+write.csv(summer_ozone_egrid_all, file = "FL_summer_ozone_egrid_all.csv", row.names = FALSE)
 ```
 
 ```{r}
@@ -310,6 +308,7 @@ winter_ozone_data_all <- ozone_data_all %>%
   summarize(average_month_ozone_concentration = mean(Daily.Max.8.hour.Ozone.Concentration),
             Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
   ungroup()
+
 
 #now combining the two data frames
 winter_ozone_egrid_all <- merge(egrid_data_counties_all, winter_ozone_data_all, by = 'County.FIPS.Code')
