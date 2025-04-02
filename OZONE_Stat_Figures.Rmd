@@ -272,7 +272,7 @@ egrid_data_counties_all <- egrid_data %>%
 
 #now combining the two data frames
 summer_ozone_egrid_all <- merge(egrid_data_counties_all, summer_ozone_data_all, by = 'County.FIPS.Code')
-write.csv(summer_ozone_egrid_all, file = "FL_summer_ozone_egrid_all.csv", row.names = FALSE)
+write.csv(summer_ozone_egrid_all, file = "summer_ozone_egrid_all.csv", row.names = FALSE)
 ```
 
 ```{r}
@@ -312,6 +312,7 @@ winter_ozone_data_all <- ozone_data_all %>%
 
 #now combining the two data frames
 winter_ozone_egrid_all <- merge(egrid_data_counties_all, winter_ozone_data_all, by = 'County.FIPS.Code')
+write.csv(winter_ozone_egrid_all, file = "winter_ozone_egrid_all.csv", row.names = FALSE)
 ```
 
 ```{r}
