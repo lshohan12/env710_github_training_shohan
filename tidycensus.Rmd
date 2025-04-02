@@ -30,7 +30,7 @@ You'll also need to look up the IDs of the variables you want to extract. Those 
 # population data by county for all the states
 
 #Apply the API key
-census_api_key("d4ad7874c996c7a83fec0a81466309ddc07d8e22a", install = TRUE)
+census_api_key("d4ad7874c996c7a83fec0a81466309ddc07d8e22a", install = TRUE, overwrite = TRUE)
 
 v17 <- load_variables(2022, 'acs5', cache = TRUE)
 v17
@@ -81,8 +81,148 @@ TN_pop <-
 
 
 ```{r}
-#find another variable 
+#median household income 
 
+AL_median_income <- 
+  get_acs(geography = "county",
+          state = "AL",
+          variables = 'B19013_001',
+          year = 2022) #gives back spatial features
+
+FL_median_income <- 
+  get_acs(geography = "county",
+          state = "FL",
+          variables = 'B19013_001',
+          year = 2022) #gives back spatial features
+
+GA_median_income <- 
+  get_acs(geography = "county",
+          state = "GA",
+          variables = 'B19013_001',
+          year = 2022) #gives back spatial features
+
+MS_median_income <- 
+  get_acs(geography = "county",
+          state = "MS",
+          variables = 'B19013_001',
+          year = 2022) #gives back spatial features
+
+NC_median_income <- 
+  get_acs(geography = "county",
+          state = "NC",
+          variables = 'B19013_001',
+          year = 2022) #gives back spatial features
+
+SC_median_income <- 
+  get_acs(geography = "county",
+          state = "SC",
+          variables = 'B19013_001',
+          year = 2022) #gives back spatial features
+
+TN_median_income <- 
+  get_acs(geography = "county",
+          state = "TN",
+          variables = 'B19013_001',
+          year = 2022) #gives back spatial features
+```
+Housing & Transportation
+Percentage of housing units with no vehicle available: B25044 (need to figure out how to work with this series)
+
+```{r}
+#Use B25044_001 (Total housing units) and B25044_003 (units with no vehicle) to figure out percent of households with no vehicle
+
+AL_percent_no_vehicle <- 
+  get_acs(geography = "county",
+          state = "AL",
+          variables = c('B25044_001', 'B25044_003'),
+          year = 2022) %>% 
+  select(GEOID, NAME, variable, estimate) %>%
+  pivot_wider(names_from = variable, values_from = estimate) %>%
+  mutate(percent_no_vehicle = (`B25044_003` / `B25044_001`) * 100)
+
+FL_percent_no_vehicle <- 
+  get_acs(geography = "county",
+          state = "FL",
+          variables = c('B25044_001', 'B25044_003'),
+          year = 2022) %>% 
+  select(GEOID, NAME, variable, estimate) %>%
+  pivot_wider(names_from = variable, values_from = estimate) %>%
+  mutate(percent_no_vehicle = (`B25044_003` / `B25044_001`) * 100)
+
+GA_percent_no_vehicle <- 
+  get_acs(geography = "county",
+          state = "GA",
+          variables = c('B25044_001', 'B25044_003'),
+          year = 2022) %>% 
+  select(GEOID, NAME, variable, estimate) %>%
+  pivot_wider(names_from = variable, values_from = estimate) %>%
+  mutate(percent_no_vehicle = (`B25044_003` / `B25044_001`) * 100)
+
+MS_percent_no_vehicle <- 
+  get_acs(geography = "county",
+          state = "MS",
+          variables = c('B25044_001', 'B25044_003'),
+          year = 2022) %>% 
+  select(GEOID, NAME, variable, estimate) %>%
+  pivot_wider(names_from = variable, values_from = estimate) %>%
+  mutate(percent_no_vehicle = (`B25044_003` / `B25044_001`) * 100)
+
+NC_percent_no_vehicle <- 
+  get_acs(geography = "county",
+          state = "NC",
+          variables = c('B25044_001', 'B25044_003'),
+          year = 2022) %>% 
+  select(GEOID, NAME, variable, estimate) %>%
+  pivot_wider(names_from = variable, values_from = estimate) %>%
+  mutate(percent_no_vehicle = (`B25044_003` / `B25044_001`) * 100)
+
+SC_percent_no_vehicle <- 
+  get_acs(geography = "county",
+          state = "SC",
+          variables = c('B25044_001', 'B25044_003'),
+          year = 2022) %>% 
+  select(GEOID, NAME, variable, estimate) %>%
+  pivot_wider(names_from = variable, values_from = estimate) %>%
+  mutate(percent_no_vehicle = (`B25044_003` / `B25044_001`) * 100)
+
+TN_percent_no_vehicle <- 
+  get_acs(geography = "county",
+          state = "TN",
+          variables = c('B25044_001', 'B25044_003'),
+          year = 2022) %>% 
+  select(GEOID, NAME, variable, estimate) %>%
+  pivot_wider(names_from = variable, values_from = estimate) %>%
+  mutate(percent_no_vehicle = (`B25044_003` / `B25044_001`) * 100)
+
+```
+Housing cost burden: B25070 (also need to figure out how to work with this)
+
+According to the U.S. Department of Housing and Urban Development (HUD), households spending more than 30% of their income on housing costs, including rent, mortgage payments, and utilities, are considered housing cost-burdened.
+
+B25070_001: Total renter-occupied units
+B25070_007 through B25070_010: Units spending 30% or more of income on rent
+B25070_007: 30–34.9%
+B25070_008: 35–39.9%
+B25070_009: 40–49.9%
+B25070_010: 50% or more
+
+summing up variables 007 to 010 and dividing by total 001
+
+```{r}
 
 ```
 
+Race & Ethnicity
+Race breakdown (White, Black, Asian, etc.): 
+B02001_002: white
+B02001_003: black
+B02001_004: native
+B02001_005: asian
+B02001_006: pacific
+B02001_007: other
+B02001_008: two_or_more
+^could potentially find percent of total pop of each? But can also scrap if too much work
+
+```{r}
+
+```
