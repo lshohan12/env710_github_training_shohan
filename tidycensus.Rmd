@@ -30,7 +30,10 @@ You'll also need to look up the IDs of the variables you want to extract. Those 
 # population data by county for all the states
 
 #Apply the API key
-census_api_key("d4ad7874c996c7a83fec0a81466309ddc07d8e22a", install = TRUE, overwrite = TRUE)
+#census_api_key("d4ad7874c996c7a83fec0a81466309ddc07d8e22a", install = TRUE, overwrite = TRUE)
+
+census_api_key("d4ad7874c996c7a83fec0a81466309ddc07d8e22a", install = FALSE, overwrite = TRUE)
+readRenviron('~/.Renviron')
 
 v17 <- load_variables(2022, 'acs5', cache = TRUE)
 v17
