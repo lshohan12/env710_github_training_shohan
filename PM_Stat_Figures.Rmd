@@ -106,7 +106,7 @@ egrid_data_FL_counties <- egrid_data %>%
          `Plant.annual.net.generation.(MWh)`) %>% #only important ones i think
   rename(County.FIPS.Code = Plant.FIPS.county.code) %>% #to merge egrid & PM25 data frames by common col
   group_by(County.FIPS.Code, Plant.county.name) %>% #change group by to new column name
-  summarize(Mean_Plant_NetGenMW = mean(`Plant.annual.net.generation.(MWh)`)) %>%
+  summarize(Sum_Plant_NetGenMW = sum(`Plant.annual.net.generation.(MWh)`)) %>%
   ungroup()
 
 #Winter PM25 data 
