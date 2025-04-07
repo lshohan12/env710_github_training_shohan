@@ -32,10 +32,15 @@ You'll also need to look up the IDs of the variables you want to extract. Those 
 #Apply the API key
 census_api_key("b5acdf7f791fa15dda8522426afc7a2e6e922c02", install = TRUE, overwrite = TRUE)
 readRenviron("~/.Renviron")
+```
 
+
+```{r}
 v17 <- load_variables(2022, 'acs5', cache = TRUE)
 v17
 
+#not sure this is correct variable??? unless im viewing wrong may should change 
+#should us B01003_001 because that is total population??? not sure
 AL_pop <- 
   get_acs(geography = "county",
           state = "AL",
@@ -77,6 +82,14 @@ TN_pop <-
           state = "TN",
           variables = 'B01001_001',
           year = 2022) #gives back spatial features
+
+
+
+
+allstates_population <- rbind(AL_pop, FL_pop, GA_pop, MS_pop, NC_pop, SC_pop, TN_pop)
+allstates_population <- rename(allstates_population, Population = estimate)
+allstates_population <- allstates_population %>%
+  select(NAME, Population)
 
 ```
 
@@ -125,6 +138,12 @@ TN_median_income <-
           state = "TN",
           variables = 'B19013_001',
           year = 2022) #gives back spatial features
+
+allstates_income <- rbind(AL_median_income, FL_median_income, GA_median_income, MS_median_income, NC_median_income, SC_median_income, TN_median_income)
+allstates_income <- rename(allstates_income, Median_Income = estimate)
+allstates_income <- allstates_income %>%
+  select(NAME, Median_Income)
+
 ```
 Housing & Transportation
 Percentage of housing units with no vehicle available: B25044 (need to figure out how to work with this series)
@@ -194,6 +213,10 @@ TN_percent_no_vehicle <-
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
   mutate(percent_no_vehicle = (`B25044_003` / `B25044_001`) * 100)
+
+allstates_novehicle <- rbind(AL_percent_no_vehicle, FL_percent_no_vehicle, GA_percent_no_vehicle, MS_percent_no_vehicle, NC_percent_no_vehicle, SC_percent_no_vehicle, TN_percent_no_vehicle)
+allstates_novehicle <- allstates_novehicle %>%
+  select(NAME, percent_no_vehicle)
 
 ```
 Housing cost burden: B25070 (also need to figure out how to work with this)
@@ -272,6 +295,11 @@ TN_percent_housing_burden <-
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
   mutate(percent_housing_burden = ((`B25070_007`+`B25070_008`+`B25070_009`+`B25070_010`) / `B25070_001`) * 100)
+
+allstates_housing_burden <- rbind(AL_percent_housing_burden, FL_percent_housing_burden, GA_percent_housing_burden, MS_percent_housing_burden, NC_percent_housing_burden, SC_percent_housing_burden, TN_percent_housing_burden)
+
+allstates_housing_burden <- allstates_housing_burden %>%
+  select(NAME, percent_housing_burden)
 
 ```
 Race & Ethnicity
@@ -376,4 +404,25 @@ TN_race <-
   mutate(percent_native = (`B02001_004` / `B01001_001`) * 100) %>% 
   mutate(percent_asian = (`B02001_005` / `B01001_001`) * 100) %>% 
   mutate(percent_pacific = (`B02001_006` / `B01001_001`) * 100) 
+
+
+allstates_race <- rbind(AL_race, FL_race, GA_race, MS_race, NC_race, SC_race, TN_race)
+
+allstates_race <- allstates_race %>%
+  select(NAME, percent_white, percent_black, percent_native,percent_asian,percent_pacific)
 ```
+
+
+```{r}
+#combining all the dataframes
+library(dplyr)
+
+combineddf <- allstates_race %>%
+  left_join(allstates_housing_burden, by = 'NAME') %>%
+  left_join(allstates_income, by = 'NAME') %>%
+  left_join(allstates_novehicle, by = 'NAME') %>%
+  left_join(allstates_population, by = 'NAME')
+
+
+```
+
