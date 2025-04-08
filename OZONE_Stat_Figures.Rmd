@@ -292,6 +292,9 @@ summer_ozone_data_all <- ozone_data_all %>%
 #   ungroup()
 
 #Data wrangling for egrid data
+egrid_data <- egrid_data %>%
+  filter(Plant.state.abbreviation %in% c('FL','AL','NC','SC','GA','MS','TN'))
+
 egrid_data_counties_all <- egrid_data %>%
   relocate(Plant.FIPS.county.code, 
            Plant.county.name, `Plant.annual.net.generation.(MWh)`) %>% #so i can see what im working with
@@ -307,11 +310,17 @@ egrid_data_counties_all <- egrid_data %>%
 
 #now combining the two data frames
 
+egrid_data_counties_all$Sum_Plant_NetGenMW <- abs(egrid_data_counties_all$Sum_Plant_NetGenMW)
 egrid_data_counties_all1 <- egrid_data_counties_all %>%
-  select(CountyState, Sum_Plant_NetGenMW)
+  select(CountyState, Sum_Plant_NetGenMW) %>%
+  group_by(CountyState) %>%
+  summarise(Sum_Plant_NetGenMW = sum(Sum_Plant_NetGenMW, na.rm = TRUE)) %>%
+  ungroup()
+  
 
 summer_ozone_data_all1 <- summer_ozone_data_all %>%
   select(CountyState, average_month_ozone_concentration)
+
 
 #summer_ozone_egrid_all <- merge(egrid_data_counties_all1, summer_ozone_data_all1, by = 'CountyState')
 summer_ozone_egrid_all <- egrid_data_counties_all1 %>% 
