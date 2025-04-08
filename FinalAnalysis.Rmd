@@ -17,30 +17,59 @@ summer_ozone_egrid_all_df <- read.csv('summer_ozone_egrid_all.csv')
 winter_PM25_egrid_all_df <- read.csv('winter_PM25_egrid_all.csv')
 summer_PM25_egrid_all_df <- read.csv('summer_PM25_egrid_all.csv')
 
-#should double check back with original source that this data got imported correctly because its a little odd to me that there are so few observations after filtering negative and 0s out... i guess there really shouldn't be any negative net generation numbers so confused by that??
 
-winter_ozone_egrid_all_df <- winter_ozone_egrid_all_df %>%
-  #filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
-  #to get rid of negative numbers and 0s ...
-  mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
- 
-summer_ozone_egrid_all_df <- summer_ozone_egrid_all_df %>%
-  #filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
-  mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
-
-winter_PM25_egrid_all_df <- winter_PM25_egrid_all_df %>%
-  filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
-  mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
-
-summer_PM25_egrid_all_df <- summer_PM25_egrid_all_df %>%
-  filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
-  mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
+# winter_ozone_egrid_all_df <- winter_ozone_egrid_all_df %>%
+#   #filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+#   #to get rid of negative numbers and 0s ...
+#   mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
+#  
+# summer_ozone_egrid_all_df <- summer_ozone_egrid_all_df %>%
+#   #filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+#   mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
+# 
+# winter_PM25_egrid_all_df <- winter_PM25_egrid_all_df %>%
+#   filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+#   mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
+# 
+# summer_PM25_egrid_all_df <- summer_PM25_egrid_all_df %>%
+#   filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+#   mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
 
 ```
 
+# Ozone
 ```{r}
+winter_ozone <- winter_ozone_egrid_all_df %>%
+  mutate(Season = 'Winter') %>%
+  mutate(SeasonBinary = '0')
 
-
+summer_ozone <- summer_ozone_egrid_all_df %>%
+  mutate(Season = 'Summer')%>%
+  mutate(SeasonBinary = '1')
+  
+all_ozone <- bind_rows(summer_ozone, winter_ozone)
 
 ```
+
+# PM 2.5
+```{r}
+# NOTE - PM winter and summer have same amount of data points in winter and summer - which could be better for analysis?
+# while ozone is a bit much
+winter_PM25 <- winter_PM25_egrid_all_df %>%
+  mutate(Season = 'Winter') %>%
+  mutate(SeasonBinary = '0')
+
+summer_PM25 <- summer_PM25_egrid_all_df %>%
+  mutate(Season = 'Summer')%>%
+  mutate(SeasonBinary = '1')
+  
+all_PM25 <- bind_rows(summer_PM25, winter_PM25)
+
+```
+
+some limitations... i dont think we should be using annual generation because that is the net, so its minusing the gross - net so we arent getting TOTAL electricity generation that plants is consuming thats why some are so low and some are negative... so we arent using just total generation these plants are producing :---)
+so we need to write in paper about this probably?
+
+
+
 

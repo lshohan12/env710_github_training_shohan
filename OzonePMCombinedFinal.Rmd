@@ -1,0 +1,303 @@
+# Loading in main EGrid Data
+```{r}
+library(here)
+library(lubridate)
+library(tidyverse)
+library(readxl); library(openxlsx)
+library(dplyr)
+library(ggplot2); library(patchwork)
+
+#reading in egrid 2022 data
+egrid_data <- read.xlsx(xlsxFile="./Datafiles/egrid2022_data.xlsx",sheet = "PLNT22")
+egrid_data$Plant.FIPS.county.code <- as.numeric(egrid_data$Plant.FIPS.county.code)
+egrid_data$`Plant.annual.net.generation.(MWh)` <- as.numeric(egrid_data$`Plant.annual.net.generation.(MWh)`)
+
+
+#created a dataframe with column name definitions
+egrid_names <- egrid_data[1,]
+egrid_names <- egrid_names %>%
+  mutate(across(everything(), as.character)) %>%
+  pivot_longer(cols = everything() ,names_to = 'Definition', values_to = 'Abbrev') 
+
+#filtering
+egrid_data <- egrid_data %>%
+  filter(!row_number() %in% c(1)) %>% #filtering out first row with names
+  filter(Plant.primary.fuel.category %in% c('BIOMASS','GAS','COAL','OIL','OFSL','OTHF'))
+
+```
+
+#OZONE!!!!!!
+
+# Loading in Ozone Concentration Data for all 7 States
+```{r}
+#ozone level recordings for all 7 states in 2022
+#Florida 
+ozone_FL_data <- read.csv('./Datafiles/ozone_FL.csv')
+ozone_FL_data$Date <- as.Date(ozone_FL_data$Date, format = "%m/%d/%Y") #converting Date into date
+ozone_FL_data <- ozone_FL_data %>% mutate(Month = month(Date)) #making a column with Month number
+
+#Georgia
+ozone_GA_data <- read.csv('./Datafiles/ozone_GA.csv')
+ozone_GA_data$Date <- as.Date(ozone_GA_data$Date, format = "%m/%d/%Y")
+ozone_GA_data <- ozone_GA_data %>% mutate(Month = month(Date))
+
+#Mississippi 
+ozone_MS_data <- read.csv('./Datafiles/ozone_MS.csv')
+ozone_MS_data$Date <- as.Date(ozone_MS_data$Date, format = "%m/%d/%Y")
+ozone_MS_data <- ozone_MS_data %>% mutate(Month = month(Date))
+
+#North Carolina
+ozone_NC_data <- read.csv('./Datafiles/ozone_NC.csv')
+ozone_NC_data$Date <- as.Date(ozone_NC_data$Date, format = "%m/%d/%Y")
+ozone_NC_data <- ozone_NC_data %>% mutate(Month = month(Date))
+
+#South Carolina
+ozone_SC_data <- read.csv('./Datafiles/ozone_SC.csv')
+ozone_SC_data$Date <- as.Date(ozone_SC_data$Date, format = "%m/%d/%Y")
+ozone_SC_data <- ozone_SC_data %>% mutate(Month = month(Date))
+
+#Tennesse
+ozone_TN_data <- read.csv('./Datafiles/ozone_TN.csv')
+ozone_TN_data$Date <- as.Date(ozone_TN_data$Date, format = "%m/%d/%Y")
+ozone_TN_data <- ozone_TN_data %>% mutate(Month = month(Date))
+
+#Alabama
+ozone_AL_data <- read.csv('./Datafiles/ozone_AL.csv')
+ozone_AL_data$Date <- as.Date(ozone_AL_data$Date, format = "%m/%d/%Y")
+ozone_AL_data <- ozone_AL_data %>% mutate(Month = month(Date))
+
+#Combine all ozone data
+ozone_data_all <- bind_rows(
+  ozone_FL_data, ozone_GA_data, ozone_MS_data, 
+  ozone_NC_data, ozone_SC_data, ozone_TN_data, 
+  ozone_AL_data
+)
+```
+
+
+# SUMMER - Combined chart of ALL counties
+```{r}
+#Data wrangling for ozone
+summer_ozone_data_all <- ozone_data_all %>%
+  filter(Month == 7) %>% #july
+  mutate(StateAbrev = case_when(
+    State == 'Florida' ~ 'FL',
+    State == 'Georgia' ~ 'GA',
+    State == 'Mississippi' ~ 'MS',
+    State == 'North Carolina' ~ 'NC',
+    State == 'South Carolina' ~ 'SC',
+    State == 'Tennessee' ~ 'TN',
+    State == 'Alabama' ~ 'AL',
+    TRUE ~ NA
+  )) %>%
+  mutate(CountyState = paste(County, StateAbrev, sep = ", ")) %>%
+  group_by(CountyState) %>%
+  summarize(average_month_ozone_concentration = mean(Daily.Max.8.hour.Ozone.Concentration),
+            Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
+  ungroup()
+
+
+#Data wrangling for egrid data
+egrid_data <- egrid_data %>%
+  filter(Plant.state.abbreviation %in% c('FL','AL','NC','SC','GA','MS','TN'))
+
+egrid_data_counties_all <- egrid_data %>%
+  relocate(Plant.FIPS.county.code, 
+           Plant.county.name, `Plant.annual.net.generation.(MWh)`) %>% #so i can see what im working with
+  select(Plant.FIPS.county.code, 
+         Plant.county.name,
+         `Plant.annual.net.generation.(MWh)`, `Plant.state.abbreviation`) %>% #only important ones i think
+  #rename(County.FIPS.Code = Plant.FIPS.county.code) %>% #to merge egrid & ozone data frames by common col
+  #group_by(Plant.state.abbreviation, Plant.county.name) %>%
+  #summarize(Sum_Plant_NetGenMW = sum(`Plant.annual.net.generation.(MWh)`)) %>%
+  rename(Sum_Plant_NetGenMW = `Plant.annual.net.generation.(MWh)`) %>%
+  mutate(CountyState = paste(Plant.county.name, Plant.state.abbreviation, sep = ", ")) %>%
+  ungroup()
+
+#now combining the two data frames
+
+egrid_data_counties_all$Sum_Plant_NetGenMW <- abs(egrid_data_counties_all$Sum_Plant_NetGenMW) #The negative numbers just mean negative net generation, electricity used at plant exceeded amont put on grid
+
+egrid_data_counties_all1 <- egrid_data_counties_all %>%
+  select(CountyState, Sum_Plant_NetGenMW) %>%
+  group_by(CountyState) %>%
+  summarise(Sum_Plant_NetGenMW = sum(Sum_Plant_NetGenMW, na.rm = TRUE)) %>%
+  ungroup()
+  
+
+summer_ozone_data_all1 <- summer_ozone_data_all %>%
+  select(CountyState, average_month_ozone_concentration)
+
+
+summer_ozone_egrid_all <- egrid_data_counties_all1 %>% 
+  inner_join(summer_ozone_data_all1, by = 'CountyState')
+
+write.csv(summer_ozone_egrid_all, file = "summer_ozone_egrid_all.csv", row.names = FALSE)
+#write.csv(egrid_data_counties_all1, file = 'egrid_data_7counties_withsumplantnetgen_organized.csv', row.names = FALSE)
+```
+
+```{r}
+#graphs for combined data
+
+#by mean ozone concentration on y and net gen on x
+all_summer_ozone_concen_fig <- summer_ozone_egrid_all %>%
+  ggplot(aes(x = Sum_Plant_NetGenMW, y = average_month_ozone_concentration)) +
+   geom_jitter() +
+  scale_x_log10() +
+  labs(x = 'Mean net gen Capacities of all Counties (MW)', y = 'Average Ozone Concentrations by County (unit)',
+       title = 'Average net gen Capacities and \n Ozone Concentrations by County in July ')
+all_summer_ozone_concen_fig
+ 
+```
+
+
+# Winter - Combined chart of ALL counties
+```{r}
+#Data wrangling for ozone
+
+winter_ozone_data_all <- ozone_data_all %>%
+  filter(Month == 1) %>% #january 
+  mutate(StateAbrev = case_when(
+    State == 'Florida' ~ 'FL',
+    State == 'Georgia' ~ 'GA',
+    State == 'Mississippi' ~ 'MS',
+    State == 'North Carolina' ~ 'NC',
+    State == 'South Carolina' ~ 'SC',
+    State == 'Tennessee' ~ 'TN',
+    State == 'Alabama' ~ 'AL',
+    TRUE ~ NA
+  )) %>%
+  mutate(CountyState = paste(County, StateAbrev, sep = ", ")) %>%
+  group_by(CountyState) %>%
+  summarize(average_month_ozone_concentration = mean(Daily.Max.8.hour.Ozone.Concentration),
+            Average_Month_AQI_Value = mean(Daily.AQI.Value))  %>% 
+  ungroup()
+
+#now combining the two data frames
+
+winter_ozone_data_all1 <- winter_ozone_data_all %>%
+  select(CountyState, average_month_ozone_concentration)
+
+#summer_ozone_egrid_all <- merge(egrid_data_counties_all1, summer_ozone_data_all1, by = 'CountyState')
+winter_ozone_egrid_all <- egrid_data_counties_all1 %>% 
+  inner_join(winter_ozone_data_all1, by = 'CountyState')
+
+write.csv(winter_ozone_egrid_all, file = "winter_ozone_egrid_all.csv", row.names = FALSE)
+```
+
+
+# PM 2.5 !!!!!!
+# Loading in PM Concentration Data for all 7 States
+```{r}
+#PM level recordings for all 7 states in 2022
+#Florida 
+PM25_FL_data <- read.csv('./Datafiles/PM25_FL.csv')
+PM25_FL_data$Date <- as.Date(PM25_FL_data$Date, format = "%m/%d/%Y") #converting Date into date
+PM25_FL_data <- PM25_FL_data %>% mutate(Month = month(Date)) #making a column with Month number
+
+#Georgia
+PM25_GA_data <- read.csv('./Datafiles/PM25_GA.csv')
+PM25_GA_data$Date <- as.Date(PM25_GA_data$Date, format = "%m/%d/%Y")
+PM25_GA_data <- PM25_GA_data %>% mutate(Month = month(Date))
+
+#Mississippi 
+PM25_MS_data <- read.csv('./Datafiles/PM25_MS.csv')
+PM25_MS_data$Date <- as.Date(PM25_MS_data$Date, format = "%m/%d/%Y")
+PM25_MS_data <- PM25_MS_data %>% mutate(Month = month(Date))
+
+#North Carolina
+PM25_NC_data <- read.csv('./Datafiles/PM25_NC.csv')
+PM25_NC_data$Date <- as.Date(PM25_NC_data$Date, format = "%m/%d/%Y")
+PM25_NC_data <- PM25_NC_data %>% mutate(Month = month(Date))
+
+#South Carolina
+PM25_SC_data <- read.csv('./Datafiles/PM25_SC.csv')
+PM25_SC_data$Date <- as.Date(PM25_SC_data$Date, format = "%m/%d/%Y")
+PM25_SC_data <- PM25_SC_data %>% mutate(Month = month(Date))
+
+#Tennesse
+PM25_TN_data <- read.csv('./Datafiles/PM25_TN.csv')
+PM25_TN_data$Date <- as.Date(PM25_TN_data$Date, format = "%m/%d/%Y")
+PM25_TN_data <- PM25_TN_data %>% mutate(Month = month(Date))
+
+#Alabama
+PM25_AL_data <- read.csv('./Datafiles/PM25_AL.csv')
+PM25_AL_data$Date <- as.Date(PM25_AL_data$Date, format = "%m/%d/%Y")
+PM25_AL_data <- PM25_AL_data %>% mutate(Month = month(Date))
+
+#Combine all PM25 data
+PM25_data_all <- bind_rows(
+  PM25_FL_data, PM25_GA_data, PM25_MS_data, 
+  PM25_NC_data, PM25_SC_data, PM25_TN_data, 
+  PM25_AL_data
+)
+```
+
+# SUMMER PM 2.5 
+```{r}
+#Data wrangling for PM 2.5 
+summer_PM25_data_all <- PM25_data_all %>%
+  filter(Month == 7) %>% #july
+  mutate(StateAbrev = case_when(
+    State == 'Florida' ~ 'FL',
+    State == 'Georgia' ~ 'GA',
+    State == 'Mississippi' ~ 'MS',
+    State == 'North Carolina' ~ 'NC',
+    State == 'South Carolina' ~ 'SC',
+    State == 'Tennessee' ~ 'TN',
+    State == 'Alabama' ~ 'AL',
+    TRUE ~ NA
+  )) %>%
+  mutate(CountyState = paste(County, StateAbrev, sep = ", ")) %>%
+  group_by(CountyState) %>%
+  summarize(average_month_PM25_concentration = mean(Daily.Mean.PM2.5.Concentration),
+            Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
+  ungroup()
+  
+
+summer_PM25_data_all1 <- summer_PM25_data_all %>%
+  select(CountyState, average_month_PM25_concentration)
+
+
+summer_PM25_egrid_all <- egrid_data_counties_all1 %>% 
+  inner_join(summer_PM25_data_all1, by = 'CountyState')
+
+write.csv(summer_PM25_egrid_all, file = "summer_PM25_egrid_all.csv", row.names = FALSE)
+
+```
+
+
+# Winter PM 2.5
+```{r}
+#Data wrangling for PM25
+
+winter_PM25_data_all <- PM25_data_all %>%
+  filter(Month == 1) %>% #july
+  mutate(StateAbrev = case_when(
+    State == 'Florida' ~ 'FL',
+    State == 'Georgia' ~ 'GA',
+    State == 'Mississippi' ~ 'MS',
+    State == 'North Carolina' ~ 'NC',
+    State == 'South Carolina' ~ 'SC',
+    State == 'Tennessee' ~ 'TN',
+    State == 'Alabama' ~ 'AL',
+    TRUE ~ NA
+  )) %>%
+  mutate(CountyState = paste(County, StateAbrev, sep = ", ")) %>%
+  group_by(CountyState) %>%
+  summarize(average_month_PM25_concentration = mean(Daily.Mean.PM2.5.Concentration),
+            Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
+  ungroup()
+
+#now combining the two data frames
+
+winter_PM25_data_all1 <- winter_PM25_data_all %>%
+  select(CountyState, average_month_PM25_concentration)
+
+winter_PM25_egrid_all <- egrid_data_counties_all1 %>% 
+  inner_join(winter_PM25_data_all1, by = 'CountyState')
+
+write.csv(winter_PM25_egrid_all, file = "winter_PM25_egrid_all.csv", row.names = FALSE)
+```
+
+
