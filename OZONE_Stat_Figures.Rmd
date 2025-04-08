@@ -251,12 +251,45 @@ summer_ozone_AL_data<-ozone_AL_data
 ```{r}
 #Data wrangling for ozone
 
+# OLD !!!!!
+#summer_ozone_data_all <- ozone_data_all %>%
+#  filter(Month == 7) %>% #july
+#  group_by(County.FIPS.Code, State.FIPS.Code) %>%
+#  summarize(average_month_ozone_concentration = mean(Daily.Max.8.hour.Ozone.Concentration),
+#            Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
+#  ungroup()
+
 summer_ozone_data_all <- ozone_data_all %>%
   filter(Month == 7) %>% #july
-  group_by(County.FIPS.Code, State.FIPS.Code) %>%
+  mutate(StateAbrev = case_when(
+    State == 'Florida' ~ 'FL',
+    State == 'Georgia' ~ 'GA',
+    State == 'Mississippi' ~ 'MS',
+    State == 'North Carolina' ~ 'NC',
+    State == 'South Carolina' ~ 'SC',
+    State == 'Tennessee' ~ 'TN',
+    State == 'Alabama' ~ 'AL',
+    TRUE ~ NA
+  )) %>%
+  mutate(CountyState = paste(County, StateAbrev, sep = ", ")) %>%
+  group_by(CountyState) %>%
   summarize(average_month_ozone_concentration = mean(Daily.Max.8.hour.Ozone.Concentration),
             Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
   ungroup()
+
+
+# OLD !!!!!
+#Data wrangling for egrid data
+# egrid_data_counties_all <- egrid_data %>%
+#   relocate(Plant.FIPS.county.code, 
+#            Plant.county.name, `Plant.annual.net.generation.(MWh)`) %>% #so i can see what im working with
+#   select(Plant.FIPS.county.code, 
+#          Plant.county.name,
+#          `Plant.annual.net.generation.(MWh)`, `Plant.state.abbreviation`) %>% #only important ones i think
+#   rename(County.FIPS.Code = Plant.FIPS.county.code) %>% #to merge egrid & ozone data frames by common col
+#   group_by(County.FIPS.Code, Plant.state.abbreviation) %>% #change group by to new column name
+#   summarize(Sum_Plant_NetGenMW = sum(`Plant.annual.net.generation.(MWh)`)) %>%
+#   ungroup()
 
 #Data wrangling for egrid data
 egrid_data_counties_all <- egrid_data %>%
@@ -265,13 +298,25 @@ egrid_data_counties_all <- egrid_data %>%
   select(Plant.FIPS.county.code, 
          Plant.county.name,
          `Plant.annual.net.generation.(MWh)`, `Plant.state.abbreviation`) %>% #only important ones i think
-  rename(County.FIPS.Code = Plant.FIPS.county.code) %>% #to merge egrid & ozone data frames by common col
-  group_by(County.FIPS.Code, Plant.state.abbreviation) %>% #change group by to new column name
-  summarize(Sum_Plant_NetGenMW = sum(`Plant.annual.net.generation.(MWh)`)) %>%
+  #rename(County.FIPS.Code = Plant.FIPS.county.code) %>% #to merge egrid & ozone data frames by common col
+  #group_by(Plant.state.abbreviation, Plant.county.name) %>%
+  #summarize(Sum_Plant_NetGenMW = sum(`Plant.annual.net.generation.(MWh)`)) %>%
+  rename(Sum_Plant_NetGenMW = `Plant.annual.net.generation.(MWh)`) %>%
+  mutate(CountyState = paste(Plant.county.name, Plant.state.abbreviation, sep = ", ")) %>%
   ungroup()
 
 #now combining the two data frames
-summer_ozone_egrid_all <- merge(egrid_data_counties_all, summer_ozone_data_all, by = 'County.FIPS.Code')
+
+egrid_data_counties_all1 <- egrid_data_counties_all %>%
+  select(CountyState, Sum_Plant_NetGenMW)
+
+summer_ozone_data_all1 <- summer_ozone_data_all %>%
+  select(CountyState, average_month_ozone_concentration)
+
+#summer_ozone_egrid_all <- merge(egrid_data_counties_all1, summer_ozone_data_all1, by = 'CountyState')
+summer_ozone_egrid_all <- egrid_data_counties_all1 %>% 
+  inner_join(summer_ozone_data_all1, by = 'CountyState')
+
 write.csv(summer_ozone_egrid_all, file = "summer_ozone_egrid_all.csv", row.names = FALSE)
 ```
 
@@ -288,13 +333,13 @@ all_summer_ozone_concen_fig <- summer_ozone_egrid_all %>%
 all_summer_ozone_concen_fig
  
  #AQI .. same graph as above but on different time scales on Y .. so may be easier to read AQI ? not sure
- all_summer_ozone_AQI <- summer_ozone_egrid_all %>%
-  ggplot(aes(x = Sum_Plant_NetGenMW, y = Average_Month_AQI_Value)) +
-   geom_jitter() +
-   scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
-  labs(x = 'Average County net gen Capacity (MW)', y = 'Average Ozone AQI',
-       title = 'July ')
- all_summer_ozone_AQI
+ # all_summer_ozone_AQI <- summer_ozone_egrid_all %>%
+ #  ggplot(aes(x = Sum_Plant_NetGenMW, y = Average_Month_AQI_Value)) +
+ #   geom_jitter() +
+ #   scale_x_log10() + #Heili suggested this!! better for outliers-can set ticks / break points on x axis too
+ #  labs(x = 'Average County net gen Capacity (MW)', y = 'Average Ozone AQI',
+ #       title = 'July ')
+ # all_summer_ozone_AQI
 ```
 
 
@@ -302,16 +347,40 @@ all_summer_ozone_concen_fig
 ```{r}
 #Data wrangling for ozone
 
+# winter_ozone_data_all <- ozone_data_all %>%
+#   filter(Month == 1) %>% #january
+#   group_by(County, County.FIPS.Code) %>%
+#   summarize(average_month_ozone_concentration = mean(Daily.Max.8.hour.Ozone.Concentration),
+#             Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
+#   ungroup()
+
 winter_ozone_data_all <- ozone_data_all %>%
-  filter(Month == 1) %>% #january
-  group_by(County, County.FIPS.Code) %>%
+  filter(Month == 1) %>% #january 
+  mutate(StateAbrev = case_when(
+    State == 'Florida' ~ 'FL',
+    State == 'Georgia' ~ 'GA',
+    State == 'Mississippi' ~ 'MS',
+    State == 'North Carolina' ~ 'NC',
+    State == 'South Carolina' ~ 'SC',
+    State == 'Tennessee' ~ 'TN',
+    State == 'Alabama' ~ 'AL',
+    TRUE ~ NA
+  )) %>%
+  mutate(CountyState = paste(County, StateAbrev, sep = ", ")) %>%
+  group_by(CountyState) %>%
   summarize(average_month_ozone_concentration = mean(Daily.Max.8.hour.Ozone.Concentration),
-            Average_Month_AQI_Value = mean(Daily.AQI.Value)) %>% #not sure which to do/difference rn
+            Average_Month_AQI_Value = mean(Daily.AQI.Value))  %>% 
   ungroup()
 
-
 #now combining the two data frames
-winter_ozone_egrid_all <- merge(egrid_data_counties_all, winter_ozone_data_all, by = 'County.FIPS.Code')
+
+winter_ozone_data_all1 <- winter_ozone_data_all %>%
+  select(CountyState, average_month_ozone_concentration)
+
+#summer_ozone_egrid_all <- merge(egrid_data_counties_all1, summer_ozone_data_all1, by = 'CountyState')
+winter_ozone_egrid_all <- egrid_data_counties_all1 %>% 
+  inner_join(winter_ozone_data_all1, by = 'CountyState')
+
 write.csv(winter_ozone_egrid_all, file = "winter_ozone_egrid_all.csv", row.names = FALSE)
 ```
 

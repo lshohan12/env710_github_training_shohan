@@ -20,21 +20,21 @@ summer_PM25_egrid_all_df <- read.csv('summer_PM25_egrid_all.csv')
 #should double check back with original source that this data got imported correctly because its a little odd to me that there are so few observations after filtering negative and 0s out... i guess there really shouldn't be any negative net generation numbers so confused by that??
 
 winter_ozone_egrid_all_df <- winter_ozone_egrid_all_df %>%
-  filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+  #filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
   #to get rid of negative numbers and 0s ...
-  mutate(Mean_Plant_NetGenMW = ifelse(Mean_Plant_NetGenMW <= 0, NA, Mean_Plant_NetGenMW))
+  mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
  
 summer_ozone_egrid_all_df <- summer_ozone_egrid_all_df %>%
-  filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
-  mutate(Mean_Plant_NetGenMW = ifelse(Mean_Plant_NetGenMW <= 0, NA, Mean_Plant_NetGenMW))
+  #filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+  mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
 
 winter_PM25_egrid_all_df <- winter_PM25_egrid_all_df %>%
   filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
-  mutate(Mean_Plant_NetGenMW = ifelse(Mean_Plant_NetGenMW <= 0, NA, Mean_Plant_NetGenMW))
+  mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
 
 summer_PM25_egrid_all_df <- summer_PM25_egrid_all_df %>%
   filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
-  mutate(Mean_Plant_NetGenMW = ifelse(Mean_Plant_NetGenMW <= 0, NA, Mean_Plant_NetGenMW))
+  mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
 
 ```
 
