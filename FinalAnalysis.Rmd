@@ -200,7 +200,10 @@ kurtosis(pm25summer_data$average_month_PM25_concentration, na.rm = TRUE) #2.708
 (hist1_netgen <- ggplot(all_ozone, aes(x = Sum_Plant_NetGenMW)) 
  + geom_histogram() +
    theme_bw())
-  #SUPERRR skewed - should handle this somehow - log transform????
+  #SUPERRR skewed - should handle this - log transform?
+
+(hist1_netgenlogscale <- ggplot(all_ozone, aes(x = log10(Sum_Plant_NetGenMW))) + geom_histogram() +
+   theme_bw())
 
 (hist2_ozoneconcent <- ggplot(all_ozone, aes(x = average_month_ozone_concentration)) + 
     geom_histogram() +
@@ -211,11 +214,12 @@ kurtosis(pm25summer_data$average_month_PM25_concentration, na.rm = TRUE) #2.708
     theme_bw())
 
 # Create and examine an initial scatterplot of data.
-(scatter1_ozone <- ggplot(all_ozone, aes(x = Sum_Plant_NetGenMW, y = average_month_ozone_concentration)) +
+(scatter1_ozone <- ggplot(all_ozone, aes(x = log10(Sum_Plant_NetGenMW), y = average_month_ozone_concentration)) +
     geom_point() + 
     theme_bw())
 
-(scatter2_pm25 <- ggplot(all_PM25, aes(x = Sum_Plant_NetGenMW, y = average_month_PM25_concentration)) +
+(scatter2_pm25 <- ggplot(all_PM25, aes(x = log10(Sum_Plant_NetGenMW), y = average_month_PM25_concentration))
+  +
     geom_point() + 
     theme_bw())
 
