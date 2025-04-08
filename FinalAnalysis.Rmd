@@ -223,7 +223,6 @@ kurtosis(pm25summer_data$average_month_PM25_concentration, na.rm = TRUE) #2.708
     geom_point() + 
     theme_bw())
 
-
 ```
 
 
