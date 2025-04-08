@@ -72,30 +72,57 @@ some limitations... i dont think we should be using annual generation because th
 so we need to write in paper about this probably?
 
 
-# Exploratory graphs ?
+# Exploratory graphs 
+## Ozone 
 ```{r}
 # OZONE
 #by mean ozone concentration on y and net gen on x
 all_ozone_fig1<- all_ozone %>%
   ggplot(aes(x = Sum_Plant_NetGenMW, y = average_month_ozone_concentration, color = Season)) +
-   geom_jitter() +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) #no scientific notation +
   #scale_x_log10() +
   labs(x = 'Mean Net Generation of all Counties (MW)', y = 'Average Ozone Concentrations (unit)',
        title = 'Average Net Generation and \n Ozone Concentrations by County in Summer and Winter')
 all_ozone_fig1
+
+
+all_ozone_fig1scaled<- all_ozone %>%
+  ggplot(aes(x = Sum_Plant_NetGenMW, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Mean Net Generation of all Counties (MW)', y = 'Average Ozone Concentrations (unit)',
+       title = 'Average Net Generation and \n Ozone Concentrations by County in Summer and Winter')
+all_ozone_fig1scaled
+
+
 ```
 
-
+## PM 2.5 
 ```{r}
 # PM 2.5 
 #by mean PM 2.5 concentration on y and net gen on x
 all_PM25_fig1<- all_PM25 %>%
   ggplot(aes(x = Sum_Plant_NetGenMW, y = average_month_PM25_concentration, color = Season)) +
-   geom_jitter() +
+  geom_point() +
+  geom_smooth(method = 'lm') +
   #scale_x_log10() +
+  scale_x_continuous(labels = scales::comma) #no scientific notation +
   labs(x = 'Mean Net Generation of All Counties (MW)', y = 'Average PM 2.5 Concentrations (unit)',
        title = 'Average Net Generation and \n PM 2.5 Concentrations by County in Summer and Winter')
 all_PM25_fig1
+
+
+all_PM25_fig1scaled<- all_PM25 %>%
+  ggplot(aes(x = Sum_Plant_NetGenMW, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Mean Net Generation of All Counties (MW)', y = 'Average PM 2.5 Concentrations (unit)',
+       title = 'Average Net Generation and \n PM 2.5 Concentrations by County in Summer and Winter')
+all_PM25_fig1scaled
 ```
 
 
