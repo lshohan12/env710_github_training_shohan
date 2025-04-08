@@ -10,7 +10,10 @@ library(lubridate)
 library(tidyverse)
 library(dplyr)
 library(ggplot2); library(patchwork)
+library(vcdExtra)
+library(moments) 
 
+#importing csvs
 winter_ozone_egrid_all_df <- read.csv('winter_ozone_egrid_all.csv')
 summer_ozone_egrid_all_df <- read.csv('summer_ozone_egrid_all.csv')
 
@@ -38,7 +41,7 @@ summer_PM25_egrid_all_df <- read.csv('summer_PM25_egrid_all.csv')
 
 ```
 
-# Ozone
+# Ozone Wrangling
 ```{r}
 winter_ozone <- winter_ozone_egrid_all_df %>%
   mutate(Season = 'Winter') %>%
@@ -52,7 +55,7 @@ all_ozone <- bind_rows(summer_ozone, winter_ozone)
 
 ```
 
-# PM 2.5
+# PM 2.5 Wrangling
 ```{r}
 # NOTE - PM winter and summer have same amount of data points in winter and summer - which could be better for analysis?
 # while ozone is a bit much
@@ -73,7 +76,7 @@ so we need to write in paper about this probably?
 
 
 # Exploratory graphs 
-## Ozone 
+## Ozone v. Net Gen - Trends with Seasonlity (2)
 ```{r}
 # OZONE
 #by mean ozone concentration on y and net gen on x
@@ -100,7 +103,7 @@ all_ozone_fig1scaled
 
 ```
 
-## PM 2.5 
+## PM 2.5 v. Net Gen - Trends with Seasonality (2)
 ```{r}
 # PM 2.5 
 #by mean PM 2.5 concentration on y and net gen on x
@@ -123,6 +126,100 @@ all_PM25_fig1scaled<- all_PM25 %>%
   labs(x = 'Mean Net Generation of All Counties (MW)', y = 'Average PM 2.5 Concentrations (unit)',
        title = 'Average Net Generation and \n PM 2.5 Concentrations by County in Summer and Winter')
 all_PM25_fig1scaled
+```
+
+
+# Histograms - PM / Ozone Count with Seasonality (2)
+maybe perform log transformation - really just looking at ozone/pm with seasonality
+```{r}
+# ozone histogram
+ozone_histogram <- ggplot(all_ozone, aes(x = average_month_ozone_concentration, 
+                                        fill = Season)) + 
+  geom_histogram() + 
+  scale_fill_manual(values = c('orange',"blue")) + 
+  labs(x = 'Ozone Concentrations', y = "Count",
+       title = 'Ozone Concentrations by Month') + 
+  facet_grid(.~Season) + # facets by habitat to avoid overlap 
+  theme_bw() + # removes the grey background 
+  theme(legend.position = "none") #removes legend
+
+ozone_histogram
+```
+
+```{r}
+# PM 2.5 histogram
+PM25_histogram <- ggplot(all_PM25, aes(x = average_month_PM25_concentration, 
+                                        fill = Season)) + 
+  geom_histogram() + 
+  scale_fill_manual(values = c('orange',"blue")) + 
+  labs(x = 'PM 2.5 Concentrations', y = "Count",
+       title = 'PM 2.5 Concentrations by Month') + 
+  facet_grid(.~Season) + # facets by habitat to avoid overlap 
+  theme_bw() + # removes the grey background 
+  theme(legend.position = "none") #removes legend
+PM25_histogram
+```
+
+Tidy Census histograms?
+```{r}
+
+```
+
+
+# Skewness and Kurtosis for Ozone and PM - Seasonlity (4)
+```{r}
+# Ozone 
+ozonewinter_data <- all_ozone %>% filter(Season == "Winter")
+skewness(ozonewinter_data$average_month_ozone_concentration, na.rm = TRUE) #-0.8506
+kurtosis(ozonewinter_data$average_month_ozone_concentration, na.rm = TRUE) #3.5699
+
+ozonesummer_data <- all_ozone %>% filter(Season == "Summer")
+skewness(ozonesummer_data$average_month_ozone_concentration, na.rm = TRUE) #0.175
+kurtosis(ozonesummer_data$average_month_ozone_concentration, na.rm = TRUE) #2.3717
+```
+
+```{r}
+# PM 2.5
+pm25winter_data <- all_PM25 %>% filter(Season == "Winter")
+skewness(pm25winter_data$average_month_PM25_concentration, na.rm = TRUE) #-1.165
+kurtosis(pm25winter_data$average_month_PM25_concentration, na.rm = TRUE) #5.4427
+
+pm25summer_data <- all_PM25 %>% filter(Season == "Summer")
+skewness(pm25summer_data$average_month_PM25_concentration, na.rm = TRUE) #0.182
+kurtosis(pm25summer_data$average_month_PM25_concentration, na.rm = TRUE) #2.708
+```
+
+
+# Linear Regression Beginning
+
+## Define Research Questions
+
+## Examine Data
+```{r}
+# Create and examine histograms of raw values.
+(hist1_netgen <- ggplot(all_ozone, aes(x = Sum_Plant_NetGenMW)) 
+ + geom_histogram() +
+   theme_bw())
+  #SUPERRR skewed - should handle this somehow - log transform????
+
+(hist2_ozoneconcent <- ggplot(all_ozone, aes(x = average_month_ozone_concentration)) + 
+    geom_histogram() +
+    theme_bw())
+
+(hist3_pm25concent <- ggplot(all_PM25, aes(x = average_month_PM25_concentration)) + 
+    geom_histogram() +
+    theme_bw())
+
+# Create and examine an initial scatterplot of data.
+(scatter1_ozone <- ggplot(all_ozone, aes(x = Sum_Plant_NetGenMW, y = average_month_ozone_concentration)) +
+    geom_point() + 
+    theme_bw())
+
+(scatter2_pm25 <- ggplot(all_PM25, aes(x = Sum_Plant_NetGenMW, y = average_month_PM25_concentration)) +
+    geom_point() + 
+    theme_bw())
+
+
 ```
 
 
