@@ -44,43 +44,43 @@ v17
 AL_pop <- 
   get_acs(geography = "county",
           state = "AL",
-          variables = 'B01001_001',
+          variables = 'B01003_001',
           year = 2022) #gives back spatial features
 
 FL_pop <- 
   get_acs(geography = "county",
           state = "FL",
-          variables = 'B01001_001',
+          variables = 'B01003_001',
           year = 2022) #gives back spatial features
 
 GA_pop <- 
   get_acs(geography = "county",
           state = "GA",
-          variables = 'B01001_001',
+          variables = 'B01003_001',
           year = 2022) #gives back spatial features
 
 MS_pop <- 
   get_acs(geography = "county",
           state = "MS",
-          variables = 'B01001_001',
+          variables = 'B01003_001',
           year = 2022) #gives back spatial features
 
 NC_pop <- 
   get_acs(geography = "county",
           state = "NC",
-          variables = 'B01001_001',
+          variables = 'B01003_001',
           year = 2022) #gives back spatial features
 
 SC_pop <- 
   get_acs(geography = "county",
           state = "SC",
-          variables = 'B01001_001',
+          variables = 'B01003_001',
           year = 2022) #gives back spatial features
 
 TN_pop <- 
   get_acs(geography = "county",
           state = "TN",
-          variables = 'B01001_001',
+          variables = 'B01003_001',
           year = 2022) #gives back spatial features
 
 
@@ -317,93 +317,93 @@ B02001_008: two_or_more
 AL_race <- 
   get_acs(geography = "county",
           state = "AL",
-          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01001_001'),
+          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01003_001'),
           year = 2022) %>% 
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
-  mutate(percent_white = (`B02001_002` / `B01001_001`) * 100) %>% 
-  mutate(percent_black = (`B02001_003` / `B01001_001`) * 100) %>% 
-  mutate(percent_native = (`B02001_004` / `B01001_001`) * 100) %>% 
-  mutate(percent_asian = (`B02001_005` / `B01001_001`) * 100) %>% 
-  mutate(percent_pacific = (`B02001_006` / `B01001_001`) * 100) 
+  mutate(percent_white = (`B02001_002` / `B01003_001`) * 100) %>% 
+  mutate(percent_black = (`B02001_003` / `B01003_001`) * 100) %>% 
+  mutate(percent_native = (`B02001_004` / `B01003_001`) * 100) %>% 
+  mutate(percent_asian = (`B02001_005` / `B01003_001`) * 100) %>% 
+  mutate(percent_pacific = (`B02001_006` / `B01003_001`) * 100) 
 
 FL_race <- 
   get_acs(geography = "county",
           state = "FL",
-          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01001_001'),
+          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01003_001'),
           year = 2022) %>% 
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
-  mutate(percent_white = (`B02001_002` / `B01001_001`) * 100) %>% 
-  mutate(percent_black = (`B02001_003` / `B01001_001`) * 100) %>% 
-  mutate(percent_native = (`B02001_004` / `B01001_001`) * 100) %>% 
-  mutate(percent_asian = (`B02001_005` / `B01001_001`) * 100) %>% 
-  mutate(percent_pacific = (`B02001_006` / `B01001_001`) * 100) 
+  mutate(percent_white = (`B02001_002` / `B01003_001`) * 100) %>% 
+  mutate(percent_black = (`B02001_003` / `B01003_001`) * 100) %>% 
+  mutate(percent_native = (`B02001_004` / `B01003_001`) * 100) %>% 
+  mutate(percent_asian = (`B02001_005` / `B01003_001`) * 100) %>% 
+  mutate(percent_pacific = (`B02001_006` / `B01003_001`) * 100) 
 
 GA_race <- 
   get_acs(geography = "county",
           state = "GA",
-          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01001_001'),
+          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01003_001'),
           year = 2022) %>% 
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
-  mutate(percent_white = (`B02001_002` / `B01001_001`) * 100) %>% 
-  mutate(percent_black = (`B02001_003` / `B01001_001`) * 100) %>% 
-  mutate(percent_native = (`B02001_004` / `B01001_001`) * 100) %>% 
-  mutate(percent_asian = (`B02001_005` / `B01001_001`) * 100) %>% 
-  mutate(percent_pacific = (`B02001_006` / `B01001_001`) * 100) 
+  mutate(percent_white = (`B02001_002` / `B01003_001`) * 100) %>% 
+  mutate(percent_black = (`B02001_003` / `B01003_001`) * 100) %>% 
+  mutate(percent_native = (`B02001_004` / `B01003_001`) * 100) %>% 
+  mutate(percent_asian = (`B02001_005` / `B01003_001`) * 100) %>% 
+  mutate(percent_pacific = (`B02001_006` / `B01003_001`) * 100) 
 
 MS_race <- 
   get_acs(geography = "county",
           state = "MS",
-          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01001_001'),
+          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01003_001'),
           year = 2022) %>% 
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
-  mutate(percent_white = (`B02001_002` / `B01001_001`) * 100) %>% 
-  mutate(percent_black = (`B02001_003` / `B01001_001`) * 100) %>% 
-  mutate(percent_native = (`B02001_004` / `B01001_001`) * 100) %>% 
-  mutate(percent_asian = (`B02001_005` / `B01001_001`) * 100) %>% 
-  mutate(percent_pacific = (`B02001_006` / `B01001_001`) * 100) 
+  mutate(percent_white = (`B02001_002` / `B01003_001`) * 100) %>% 
+  mutate(percent_black = (`B02001_003` / `B01003_001`) * 100) %>% 
+  mutate(percent_native = (`B02001_004` / `B01003_001`) * 100) %>% 
+  mutate(percent_asian = (`B02001_005` / `B01003_001`) * 100) %>% 
+  mutate(percent_pacific = (`B02001_006` / `B01003_001`) * 100) 
 
 NC_race <- 
   get_acs(geography = "county",
           state = "NC",
-          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01001_001'),
+          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01003_001'),
           year = 2022) %>% 
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
-  mutate(percent_white = (`B02001_002` / `B01001_001`) * 100) %>% 
-  mutate(percent_black = (`B02001_003` / `B01001_001`) * 100) %>% 
-  mutate(percent_native = (`B02001_004` / `B01001_001`) * 100) %>% 
-  mutate(percent_asian = (`B02001_005` / `B01001_001`) * 100) %>% 
-  mutate(percent_pacific = (`B02001_006` / `B01001_001`) * 100) 
+  mutate(percent_white = (`B02001_002` / `B01003_001`) * 100) %>% 
+  mutate(percent_black = (`B02001_003` / `B01003_001`) * 100) %>% 
+  mutate(percent_native = (`B02001_004` / `B01003_001`) * 100) %>% 
+  mutate(percent_asian = (`B02001_005` / `B01003_001`) * 100) %>% 
+  mutate(percent_pacific = (`B02001_006` / `B01003_001`) * 100)  
 
 SC_race <- 
   get_acs(geography = "county",
           state = "SC",
-          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01001_001'),
+          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01003_001'),
           year = 2022) %>% 
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
-  mutate(percent_white = (`B02001_002` / `B01001_001`) * 100) %>% 
-  mutate(percent_black = (`B02001_003` / `B01001_001`) * 100) %>% 
-  mutate(percent_native = (`B02001_004` / `B01001_001`) * 100) %>% 
-  mutate(percent_asian = (`B02001_005` / `B01001_001`) * 100) %>% 
-  mutate(percent_pacific = (`B02001_006` / `B01001_001`) * 100) 
+  mutate(percent_white = (`B02001_002` / `B01003_001`) * 100) %>% 
+  mutate(percent_black = (`B02001_003` / `B01003_001`) * 100) %>% 
+  mutate(percent_native = (`B02001_004` / `B01003_001`) * 100) %>% 
+  mutate(percent_asian = (`B02001_005` / `B01003_001`) * 100) %>% 
+  mutate(percent_pacific = (`B02001_006` / `B01003_001`) * 100) 
 
 TN_race <- 
   get_acs(geography = "county",
           state = "TN",
-          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01001_001'),
+          variables = c('B02001_002', 'B02001_003', 'B02001_004', 'B02001_005', 'B02001_006', 'B01003_001'),
           year = 2022) %>% 
   select(GEOID, NAME, variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
-  mutate(percent_white = (`B02001_002` / `B01001_001`) * 100) %>% 
-  mutate(percent_black = (`B02001_003` / `B01001_001`) * 100) %>% 
-  mutate(percent_native = (`B02001_004` / `B01001_001`) * 100) %>% 
-  mutate(percent_asian = (`B02001_005` / `B01001_001`) * 100) %>% 
-  mutate(percent_pacific = (`B02001_006` / `B01001_001`) * 100) 
+  mutate(percent_white = (`B02001_002` / `B01003_001`) * 100) %>% 
+  mutate(percent_black = (`B02001_003` / `B01003_001`) * 100) %>% 
+  mutate(percent_native = (`B02001_004` / `B01003_001`) * 100) %>% 
+  mutate(percent_asian = (`B02001_005` / `B01003_001`) * 100) %>% 
+  mutate(percent_pacific = (`B02001_006` / `B01003_001`) * 100) 
 
 
 allstates_race <- rbind(AL_race, FL_race, GA_race, MS_race, NC_race, SC_race, TN_race)
@@ -412,17 +412,29 @@ allstates_race <- allstates_race %>%
   select(NAME, percent_white, percent_black, percent_native,percent_asian,percent_pacific)
 ```
 
-
 ```{r}
 #combining all the dataframes
 library(dplyr)
 
-combineddf <- allstates_race %>%
+combined_population_variables <- allstates_race %>%
   left_join(allstates_housing_burden, by = 'NAME') %>%
   left_join(allstates_income, by = 'NAME') %>%
   left_join(allstates_novehicle, by = 'NAME') %>%
   left_join(allstates_population, by = 'NAME')
 
-
+#Changing states to abbreviations so that we can combine with egrid data on County, State
+combined_population_variables$NAME <- gsub("South Carolina", "SC", combined_population_variables$NAME)
+combined_population_variables$NAME <- gsub("North Carolina", "NC", combined_population_variables$NAME)
+combined_population_variables$NAME <- gsub("Tennessee", "TN", combined_population_variables$NAME)
+combined_population_variables$NAME <- gsub("Georgia", "GA", combined_population_variables$NAME)
+combined_population_variables$NAME <- gsub("Mississippi", "MS", combined_population_variables$NAME)
+combined_population_variables$NAME <- gsub("Florida", "FL", combined_population_variables$NAME)
+combined_population_variables$NAME <- gsub("Alabama", "AL", combined_population_variables$NAME)
+#Getting rid of "County" that's in name
+combined_population_variables$NAME <- gsub("County", "", combined_population_variables$NAME)
+#Getting rid of extra space between county and comma
+combined_population_variables$NAME <- gsub(" ,", ",", combined_population_variables$NAME)
+#Rename column so I can merge pollution and population dataframes on CountyState
+combined_population_variables <- rename(combined_population_variables, CountyState = NAME)
 ```
 
