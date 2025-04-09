@@ -99,13 +99,15 @@ all_PM25_temp <- all_PM25 %>%
 all_ozone_temp <- all_ozone %>%
   separate(CountyState, into = c("County", "State"), sep = ",\\s*")
 
-ggplot(all_PM25_temp, aes(x = State)) +
+all_PM25_graph <- ggplot(all_PM25_temp, aes(x = State)) +
   geom_bar(fill = "pink") +
   ggtitle("Count of PM2.5 Observations in each State")
 
-ggplot(all_ozone_temp, aes(x = State)) +
+all_ozone_graph <- ggplot(all_ozone_temp, aes(x = State)) +
   geom_bar(fill = "lightblue") +
   ggtitle("Count of Ozone Observations in each State")
+
+all_PM25_graph + all_ozone_graph
 ```
 
 
