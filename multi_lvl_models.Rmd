@@ -1,0 +1,15 @@
+---
+title: "multi_lvl_models"
+output: html_document
+---
+
+Notes:
+
+Log transform predictors:
+- Annual generation
+- Population
+- Percent no vehicle
+
+Doesn't need log transformation (didn't see much shift in scatter + lm exploratory graphs):
+- Median Income
+- Housing burden
