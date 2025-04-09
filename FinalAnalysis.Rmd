@@ -452,3 +452,9 @@ PM25_by_housing_burden_scaled <- all_PM25 %>%
        title = 'Percent Housing Burden Scaled and \n PM25 Concentrations by County in Summer and Winter')
 PM25_by_housing_burden_scaled
 ```
+
+```{r}
+write.csv(all_ozone, file = "ALL_OZONE_FINAL.csv", row.names = FALSE)
+write.csv(all_PM25, file = "ALL_PM25_FINAL.csv", row.names = FALSE)
+```
+
