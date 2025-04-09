@@ -123,6 +123,9 @@ AIC(secondmodel_ozone_lme1,secondmodel_ozone_lm)
 summary(secondmodel_ozone_lme1)
 plot(secondmodel_ozone_lme1)
 qqnorm(secondmodel_ozone_lme1)
+rsq(secondmodel_ozone_lme1)
+
+AIC(ozone_lme1, secondmodel_ozone_lme1)
 ```
 
 ```{r}
@@ -215,6 +218,8 @@ AIC(secondmodel_pm25_lme1, secondmodel_pm25_lm )
 summary(secondmodel_pm25_lme1)
 plot(secondmodel_pm25_lme1)
 qqnorm(secondmodel_pm25_lme1)
+
+AIC(pm25_lme1,secondmodel_pm25_lme1)
 ```
 
 ```{r}
@@ -225,23 +230,22 @@ tbl_regression(secondmodel_pm25_lme1, estimate_fun = function(x) style_sigfig(x,
 
 ```{r}
 
-pm_netgen_graph <- 
-
-pm_black_graph <-
-
+# most significant graph for PM 2.5 second model - pvalue <0.0001
+  
 pm_logpopulation <- all_pm25_df %>%
   ggplot(aes(x = log_Population, y = average_month_PM25_concentration, color = State)) +
   geom_point() +
   geom_smooth(method = 'lm', se = FALSE) +
-  geom_smooth(aes(group = 1), method = 'lm',color = 'black', se = FALSE)
+  geom_smooth(aes(group = 1), method = 'lm',color = 'black', se = FALSE) +
+  labs(x = 'Population LogTransformed', y = 'PM 2.5 Concentration Levels (ug/m3)', title = 'PM 2.5 Concentration Levels with Human Population Numbers by State')
 pm_logpopulation
 
-
+# most significant variable for ozone model - 
 ```
-
-
 ```{r}
 summary(all_pm25_df)
 summary(all_ozone_df)
 ```
+
+
 

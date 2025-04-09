@@ -174,8 +174,8 @@ ozone_histogram <- ggplot(all_ozone, aes(x = average_month_ozone_concentration,
                                         fill = Season)) + 
   geom_histogram() + 
   scale_fill_manual(values = c('orange',"blue")) + 
-  labs(x = 'Ozone Concentrations', y = "Count",
-       title = 'Ozone Concentrations by Month') + 
+  labs(x = 'Ozone Concentrations (ppm)', y = "Count",
+       title = 'Ozone Concentrations by Season') + 
   facet_grid(.~Season) + # facets by habitat to avoid overlap 
   theme_bw() + # removes the grey background 
   theme(legend.position = "none") #removes legend
@@ -189,8 +189,8 @@ PM25_histogram <- ggplot(all_PM25, aes(x = average_month_PM25_concentration,
                                         fill = Season)) + 
   geom_histogram() + 
   scale_fill_manual(values = c('orange',"blue")) + 
-  labs(x = 'PM 2.5 Concentrations', y = "Count",
-       title = 'PM 2.5 Concentrations by Month') + 
+  labs(x = 'PM 2.5 Concentrations (ug/m3)', y = "Count",
+       title = 'PM 2.5 Concentrations by Season') + 
   facet_grid(.~Season) + # facets by habitat to avoid overlap 
   theme_bw() + # removes the grey background 
   theme(legend.position = "none") #removes legend
