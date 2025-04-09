@@ -89,6 +89,47 @@ The multi-level model has a lower AIC, and therefore has the better model fit!
 tbl_regression(ozone_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
 ```
 
+# SECOND MODEL - PULLING VARIABLES OFF !!!! - OZONE: Fit linear regression model with random effect & evaluate model diagnostics 
+```{r}
+secondmodel_ozone_lme1 <- lme(average_month_ozone_concentration ~ 
+                  #LogSum_Plant_NetGenMW +  - threshold of pvalue 0.6 and above we remove
+                  Season + 
+                  #percent_white + 
+                  percent_black + 
+                  percent_asian + 
+                  percent_housing_burden + 
+                  Median_Income + 
+                  #percent_no_vehicle + 
+                  log_Population, random = ~1 | State, 
+                  data = all_ozone_df,
+                  na.action = na.omit)
+
+#fitting standard linear regression, which allows us to compare if the addition of a random effect yeilds a better model fit
+secondmodel_ozone_lm <- gls(average_month_ozone_concentration ~ 
+                  #LogSum_Plant_NetGenMW + 
+                  Season + 
+                  #percent_white + 
+                  percent_black + 
+                  percent_asian + 
+                  percent_housing_burden + 
+                  Median_Income + 
+                  #percent_no_vehicle + 
+                  log_Population,
+                  data = all_ozone_df,
+                na.action = na.omit)
+
+AIC(secondmodel_ozone_lme1,secondmodel_ozone_lm)
+
+summary(secondmodel_ozone_lme1)
+plot(secondmodel_ozone_lme1)
+qqnorm(secondmodel_ozone_lme1)
+```
+
+```{r}
+tbl_regression(secondmodel_ozone_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
+```
+
+
 #PM2.5: Fit linear regression model with random effect & evaluate model diagnostics
 ```{r}
 #Make sure to avoid undefined variables when you do log(0)
@@ -139,4 +180,45 @@ The multi-level model has a lower AIC, and therefore has the better model fit!
 ```{r}
 tbl_regression(pm25_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
 ```
+
+
+#SECOND MODEL - PULLING VARIABLES OFF !!!! - PM2.5: Fit linear regression model with random effect & evaluate model diagnostics
+```{r}
+
+secondmodel_pm25_lme1 <- lme(average_month_PM25_concentration ~ LogSum_Plant_NetGenMW + 
+                  Season + 
+                  #percent_white +  - too low
+                  percent_black + 
+                  #percent_asian + 
+                  percent_housing_burden + 
+                  #Median_Income + 
+                  percent_no_vehicle + 
+                  log_Population, random = ~1 | State, 
+                  data = all_pm25_df,
+                  na.action = na.omit)
+
+#fitting standard linear regression, which allows us to compare if the addition of a random effect yeilds a better model fit
+secondmodel_pm25_lm <- gls(average_month_PM25_concentration ~ LogSum_Plant_NetGenMW + 
+                  Season + 
+                  #percent_white + 
+                  percent_black + 
+                  #percent_asian + 
+                  percent_housing_burden + 
+                  #Median_Income + 
+                  percent_no_vehicle + 
+                  log_Population,
+                  data = all_pm25_df,
+                  na.action = na.omit)
+
+AIC(secondmodel_pm25_lme1, secondmodel_pm25_lm )
+
+summary(secondmodel_pm25_lme1)
+plot(secondmodel_pm25_lme1)
+qqnorm(secondmodel_pm25_lme1)
+```
+
+```{r}
+tbl_regression(secondmodel_pm25_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
+```
+
 
