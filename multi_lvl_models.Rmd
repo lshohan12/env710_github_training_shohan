@@ -51,7 +51,7 @@ all_ozone_df <- all_ozone_df %>%
 all_ozone_df <- all_ozone_df %>%
   separate(CountyState, into = c("County", "State"), sep = ",\\s*")
 
-ozone_lme1 <- lme(average_month_ozone_concentration ~ Sum_Plant_NetGenMW + 
+ozone_lme1 <- lme(average_month_ozone_concentration ~ LogSum_Plant_NetGenMW + 
                   Season + 
                   percent_white + 
                   percent_black + 
@@ -60,10 +60,11 @@ ozone_lme1 <- lme(average_month_ozone_concentration ~ Sum_Plant_NetGenMW +
                   Median_Income + 
                   percent_no_vehicle + 
                   log_Population, random = ~1 | State, 
-                  data = all_ozone_df)
+                  data = all_ozone_df,
+                  na.action = na.omit)
 
 #fitting standard linear regression, which allows us to compare if the addition of a random effect yeilds a better model fit
-ozone_lm <- gls(average_month_ozone_concentration ~ Sum_Plant_NetGenMW + 
+ozone_lm <- gls(average_month_ozone_concentration ~ LogSum_Plant_NetGenMW + 
                   Season + 
                   percent_white + 
                   percent_black + 
@@ -72,7 +73,8 @@ ozone_lm <- gls(average_month_ozone_concentration ~ Sum_Plant_NetGenMW +
                   Median_Income + 
                   percent_no_vehicle + 
                   log_Population,
-                  data = all_ozone_df)
+                  data = all_ozone_df,
+                na.action = na.omit)
 
 AIC(ozone_lme1,ozone_lm)
 
@@ -84,7 +86,7 @@ The multi-level model has a lower AIC, and therefore has the better model fit!
 
 ##Communicating the methods and results
 ```{r}
-tbl_regression(ozone_lme1)
+tbl_regression(ozone_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
 ```
 
 #PM2.5: Fit linear regression model with random effect & evaluate model diagnostics
@@ -100,7 +102,7 @@ all_pm25_df <- all_pm25_df %>%
 all_pm25_df <- all_pm25_df %>%
   separate(CountyState, into = c("County", "State"), sep = ",\\s*")
 
-pm25_lme1 <- lme(average_month_PM25_concentration ~ Sum_Plant_NetGenMW + 
+pm25_lme1 <- lme(average_month_PM25_concentration ~ LogSum_Plant_NetGenMW + 
                   Season + 
                   percent_white + 
                   percent_black + 
@@ -109,10 +111,11 @@ pm25_lme1 <- lme(average_month_PM25_concentration ~ Sum_Plant_NetGenMW +
                   Median_Income + 
                   percent_no_vehicle + 
                   log_Population, random = ~1 | State, 
-                  data = all_pm25_df)
+                  data = all_pm25_df,
+                  na.action = na.omit)
 
 #fitting standard linear regression, which allows us to compare if the addition of a random effect yeilds a better model fit
-pm25_lm <- gls(average_month_PM25_concentration ~ Sum_Plant_NetGenMW + 
+pm25_lm <- gls(average_month_PM25_concentration ~ LogSum_Plant_NetGenMW + 
                   Season + 
                   percent_white + 
                   percent_black + 
@@ -121,7 +124,8 @@ pm25_lm <- gls(average_month_PM25_concentration ~ Sum_Plant_NetGenMW +
                   Median_Income + 
                   percent_no_vehicle + 
                   log_Population,
-                  data = all_pm25_df)
+                  data = all_pm25_df,
+                  na.action = na.omit)
 
 AIC(pm25_lme1,pm25_lm )
 
@@ -133,6 +137,6 @@ The multi-level model has a lower AIC, and therefore has the better model fit!
 
 ##Communicating the methods and results
 ```{r}
-tbl_regression(pm25_lme1)
+tbl_regression(pm25_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
 ```
 
