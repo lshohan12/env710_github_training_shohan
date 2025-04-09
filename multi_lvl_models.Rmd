@@ -123,7 +123,7 @@ AIC(secondmodel_ozone_lme1,secondmodel_ozone_lm)
 summary(secondmodel_ozone_lme1)
 plot(secondmodel_ozone_lme1)
 qqnorm(secondmodel_ozone_lme1)
-rsq(secondmodel_ozone_lme1)
+
 
 AIC(ozone_lme1, secondmodel_ozone_lme1)
 ```
@@ -236,7 +236,7 @@ pm_logpopulation <- all_pm25_df %>%
   ggplot(aes(x = log_Population, y = average_month_PM25_concentration, color = State)) +
   geom_point() +
   geom_smooth(method = 'lm', se = FALSE) +
-  geom_smooth(aes(group = 1), method = 'lm',color = 'black', se = FALSE) +
+  geom_smooth(aes(group = 1), method = 'lm',color = 'black', formula = y ~ x) +
   labs(x = 'Population LogTransformed', y = 'PM 2.5 Concentration Levels (ug/m3)', title = 'PM 2.5 Concentration Levels with Human Population Numbers by State')
 pm_logpopulation
 
