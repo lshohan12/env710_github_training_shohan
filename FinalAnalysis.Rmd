@@ -461,4 +461,20 @@ write.csv(all_PM25, file = "ALL_PM25_FINAL.csv", row.names = FALSE)
 ```
 
 
+```{r}
+summary(all_ozone_df)
+sd(all_ozone_df$Sum_Plant_NetGenMW)
+sd(all_ozone_df$average_month_ozone_concentration)
+sd(all_ozone_df$Median_Income)
+sd(all_ozone_df$percent_white)
+sd(all_ozone_df$percent_black)
+sd(all_ozone_df$percent_asian)
+sd(all_ozone_df$percent_housing_burden)
+sd(all_ozone_df$percent_no_vehicle)
+sd(all_ozone_df$Population)
+
+
+all_pm25_df
+
+```
 
