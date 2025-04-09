@@ -221,4 +221,27 @@ qqnorm(secondmodel_pm25_lme1)
 tbl_regression(secondmodel_pm25_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
 ```
 
+# final graph 
+
+```{r}
+
+pm_netgen_graph <- 
+
+pm_black_graph <-
+
+pm_logpopulation <- all_pm25_df %>%
+  ggplot(aes(x = log_Population, y = average_month_PM25_concentration, color = State)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE) +
+  geom_smooth(aes(group = 1), method = 'lm',color = 'black', se = FALSE)
+pm_logpopulation
+
+
+```
+
+
+```{r}
+summary(all_pm25_df)
+summary(all_ozone_df)
+```
 
