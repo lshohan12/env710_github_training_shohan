@@ -243,6 +243,15 @@ pm_logpopulation
 # most significant variable for ozone model - 
 ```
 ```{r}
+#install.packages('performance')
+library(performance)
+#Finding conditional R^2 value
+r2(secondmodel_pm25_lme1)
+r2(secondmodel_ozone_lme1)
+```
+
+
+```{r}
 summary(all_pm25_df)
 summary(all_ozone_df)
 ```
