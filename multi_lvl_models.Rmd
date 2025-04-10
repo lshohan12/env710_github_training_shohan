@@ -248,6 +248,7 @@ library(performance)
 #Finding conditional R^2 value
 r2(secondmodel_pm25_lme1)
 r2(secondmodel_ozone_lme1)
+r2(pm25_lme1)
 ```
 
 
