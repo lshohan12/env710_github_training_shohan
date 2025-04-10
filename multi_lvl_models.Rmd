@@ -227,7 +227,7 @@ tbl_regression(secondmodel_pm25_lme1, estimate_fun = function(x) style_sigfig(x,
 ```
 
 # final graph 
-
+##PM!!!!!
 ```{r}
 
 # most significant graph for PM 2.5 second model - pvalue <0.0001
@@ -242,6 +242,18 @@ pm_logpopulation
 
 # most significant variable for ozone model - 
 ```
+
+##OZONE!!!!!
+```{r}
+ozone_season <- all_ozone_df %>%
+  ggplot(aes(x = Season, y = average_month_ozone_concentration, color = State, fill = State)) +
+  geom_boxplot(alpha = 0.4) +  # adjust transparency here
+  labs(x = 'Season', y = 'Ozone Concentration Levels (ppm)', 
+       title = 'Ozone Concentration Levels during each Season by State')
+ozone_season
+```
+
+
 ```{r}
 #install.packages('performance')
 library(performance)
