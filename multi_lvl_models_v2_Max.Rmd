@@ -1,0 +1,260 @@
+---
+title: "multi_lvl_models"
+output: html_document
+---
+
+```{r}
+library(here)
+library(tidyverse)
+library(lubridate)
+library(nlme)
+library(gtsummary)
+```
+
+Notes:
+
+Log transform predictors:
+- Annual generation
+- Population
+
+Doesn't need log transformation (didn't see much shift in scatter + lm exploratory graphs):
+- Percent no vehicle
+- Median Income
+- Housing burden
+
+PM25_lvl ~ annual generation + population + median income + percent of household with no cars + percent households spending more than 30% of income on housing costs + winter + summer , random = ~1 | State, data = all_of_ data
+
+```{r}
+#importing csvs
+all_ozone_df <- read.csv('ALL_OZONE_FINAL_MAX.csv')
+all_pm25_df <- read.csv('ALL_PM25_FINAL_MAX.csv')
+
+#Making Season column factors
+all_ozone_df <- all_ozone_df %>% 
+  mutate(Season = factor(Season, levels = c("Winter", "Summer")))
+
+all_pm25_df <- all_pm25_df %>% 
+  mutate(Season = factor(Season, levels = c("Winter", "Summer")))
+
+```
+
+#OZONE: Fit linear regression model with random effect & evaluate model diagnostics
+```{r}
+#Make sure to avoid undefined variables when you do log(0)
+all_ozone_df <- all_ozone_df %>%
+  mutate(
+    LogSum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW > 0, log10(Sum_Plant_NetGenMW), NA),
+    log_Population = ifelse(Population > 0, log10(Population), NA)
+  )
+
+#adding a column in the data to show state
+all_ozone_df <- all_ozone_df %>%
+  separate(CountyState, into = c("County", "State"), sep = ",\\s*")
+
+ozone_lme1 <- lme(average_month_ozone_concentration ~ LogSum_Plant_NetGenMW + 
+                  Season + 
+                  percent_white + 
+                  percent_black + 
+                  percent_asian + 
+                  percent_housing_burden + 
+                  Median_Income + 
+                  percent_no_vehicle + 
+                  log_Population, random = ~1 | State, 
+                  data = all_ozone_df,
+                  na.action = na.omit)
+
+#fitting standard linear regression, which allows us to compare if the addition of a random effect yeilds a better model fit
+ozone_lm <- gls(average_month_ozone_concentration ~ LogSum_Plant_NetGenMW + 
+                  Season + 
+                  percent_white + 
+                  percent_black + 
+                  percent_asian + 
+                  percent_housing_burden + 
+                  Median_Income + 
+                  percent_no_vehicle + 
+                  log_Population,
+                  data = all_ozone_df,
+                na.action = na.omit)
+
+AIC(ozone_lme1,ozone_lm)
+
+summary(ozone_lme1)
+plot(ozone_lme1)
+qqnorm(ozone_lme1)
+```
+The multi-level model has a lower AIC, and therefore has the better model fit!
+
+##Communicating the methods and results
+```{r}
+tbl_regression(ozone_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
+```
+
+# SECOND MODEL - PULLING VARIABLES OFF !!!! - OZONE: Fit linear regression model with random effect & evaluate model diagnostics 
+```{r}
+secondmodel_ozone_lme1 <- lme(average_month_ozone_concentration ~ 
+                  #LogSum_Plant_NetGenMW +  - threshold of pvalue 0.6 and above we remove
+                  Season + 
+                  #percent_white + 
+                  percent_black + 
+                  percent_asian + 
+                  percent_housing_burden + 
+                  Median_Income + 
+                  #percent_no_vehicle + 
+                  log_Population, random = ~1 | State, 
+                  data = all_ozone_df,
+                  na.action = na.omit)
+
+#fitting standard linear regression, which allows us to compare if the addition of a random effect yeilds a better model fit
+secondmodel_ozone_lm <- gls(average_month_ozone_concentration ~ 
+                  #LogSum_Plant_NetGenMW + 
+                  Season + 
+                  #percent_white + 
+                  percent_black + 
+                  percent_asian + 
+                  percent_housing_burden + 
+                  Median_Income + 
+                  #percent_no_vehicle + 
+                  log_Population,
+                  data = all_ozone_df,
+                na.action = na.omit)
+
+AIC(secondmodel_ozone_lme1,secondmodel_ozone_lm)
+
+summary(secondmodel_ozone_lme1)
+plot(secondmodel_ozone_lme1)
+qqnorm(secondmodel_ozone_lme1)
+
+
+AIC(ozone_lme1, secondmodel_ozone_lme1)
+```
+
+```{r}
+tbl_regression(secondmodel_ozone_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
+```
+
+
+#PM2.5: Fit linear regression model with random effect & evaluate model diagnostics
+```{r}
+#Make sure to avoid undefined variables when you do log(0)
+all_pm25_df <- all_pm25_df %>%
+  mutate(
+    LogSum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW > 0, log10(Sum_Plant_NetGenMW), NA),
+    log_Population = ifelse(Population > 0, log10(Population), NA)
+  )
+
+#adding a column in the data to show state
+all_pm25_df <- all_pm25_df %>%
+  separate(CountyState, into = c("County", "State"), sep = ",\\s*")
+
+pm25_lme1 <- lme(average_month_PM25_concentration ~ LogSum_Plant_NetGenMW + 
+                  Season + 
+                  percent_white + 
+                  percent_black + 
+                  percent_asian + 
+                  percent_housing_burden + 
+                  Median_Income + 
+                  percent_no_vehicle + 
+                  log_Population, random = ~1 | State, 
+                  data = all_pm25_df,
+                  na.action = na.omit)
+
+#fitting standard linear regression, which allows us to compare if the addition of a random effect yeilds a better model fit
+pm25_lm <- gls(average_month_PM25_concentration ~ LogSum_Plant_NetGenMW + 
+                  Season + 
+                  percent_white + 
+                  percent_black + 
+                  percent_asian + 
+                  percent_housing_burden + 
+                  Median_Income + 
+                  percent_no_vehicle + 
+                  log_Population,
+                  data = all_pm25_df,
+                  na.action = na.omit)
+
+AIC(pm25_lme1,pm25_lm )
+
+summary(pm25_lme1)
+plot(pm25_lme1)
+qqnorm(pm25_lme1)
+```
+The multi-level model has a lower AIC, and therefore has the better model fit!
+
+##Communicating the methods and results
+```{r}
+tbl_regression(pm25_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
+```
+
+
+#SECOND MODEL - PULLING VARIABLES OFF !!!! - PM2.5: Fit linear regression model with random effect & evaluate model diagnostics
+```{r}
+
+secondmodel_pm25_lme1 <- lme(average_month_PM25_concentration ~ LogSum_Plant_NetGenMW + 
+                  Season + 
+                  #percent_white +  - too low
+                  percent_black + 
+                  #percent_asian + 
+                  percent_housing_burden + 
+                  #Median_Income + 
+                  percent_no_vehicle + 
+                  log_Population, random = ~1 | State, 
+                  data = all_pm25_df,
+                  na.action = na.omit)
+
+#fitting standard linear regression, which allows us to compare if the addition of a random effect yeilds a better model fit
+secondmodel_pm25_lm <- gls(average_month_PM25_concentration ~ LogSum_Plant_NetGenMW + 
+                  Season + 
+                  #percent_white + 
+                  percent_black + 
+                  #percent_asian + 
+                  percent_housing_burden + 
+                  #Median_Income + 
+                  percent_no_vehicle + 
+                  log_Population,
+                  data = all_pm25_df,
+                  na.action = na.omit)
+
+AIC(secondmodel_pm25_lme1, secondmodel_pm25_lm )
+
+summary(secondmodel_pm25_lme1)
+plot(secondmodel_pm25_lme1)
+qqnorm(secondmodel_pm25_lme1)
+
+AIC(pm25_lme1,secondmodel_pm25_lme1)
+```
+
+```{r}
+tbl_regression(secondmodel_pm25_lme1, estimate_fun = function(x) style_sigfig(x, digits = 4))
+```
+
+# final graph 
+
+```{r}
+
+# most significant graph for PM 2.5 second model - pvalue <0.0001
+  
+pm_logpopulation <- all_pm25_df %>%
+  ggplot(aes(x = log_Population, y = average_month_PM25_concentration, color = State)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE) +
+  geom_smooth(aes(group = 1), method = 'lm',color = 'black', formula = y ~ x) +
+  labs(x = 'Population LogTransformed', y = 'PM 2.5 Concentration Levels (ug/m3)', title = 'PM 2.5 Concentration Levels with Human Population Numbers by State')
+pm_logpopulation
+
+# most significant variable for ozone model - 
+```
+```{r}
+#install.packages('performance')
+library(performance)
+#Finding conditional R^2 value
+r2(secondmodel_pm25_lme1)
+r2(secondmodel_ozone_lme1)
+```
+
+
+```{r}
+summary(all_pm25_df)
+summary(all_ozone_df)
+```
+
+
+

@@ -1,0 +1,480 @@
+---
+title: "Final Analysis"
+output: pdf_document
+date: "April 5"
+---
+
+```{r}
+#install.packages('vcdExtra')
+
+library(here)
+library(lubridate)
+library(tidyverse)
+library(dplyr)
+library(ggplot2); library(patchwork)
+library(vcdExtra)
+library(moments) 
+
+#importing csvs
+winter_ozone_egrid_all_df <- read.csv('winter_ozone_egrid_all_max.csv')
+summer_ozone_egrid_all_df <- read.csv('summer_ozone_egrid_all_max.csv')
+
+winter_PM25_egrid_all_df <- read.csv('winter_PM25_egrid_all_max.csv')
+summer_PM25_egrid_all_df <- read.csv('summer_PM25_egrid_all_max.csv')
+
+#dont need anymore i think
+
+# winter_ozone_egrid_all_df <- winter_ozone_egrid_all_df %>%
+#   #filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+#   #to get rid of negative numbers and 0s ...
+#   mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
+#  
+# summer_ozone_egrid_all_df <- summer_ozone_egrid_all_df %>%
+#   #filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+#   mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
+# 
+# winter_PM25_egrid_all_df <- winter_PM25_egrid_all_df %>%
+#   filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+#   mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
+# 
+# summer_PM25_egrid_all_df <- summer_PM25_egrid_all_df %>%
+#   filter(Plant.state.abbreviation %in% c('GA','FL','NC','SC','MS','TN','AL')) %>%
+#   mutate(Sum_Plant_NetGenMW = ifelse(Sum_Plant_NetGenMW <= 0, NA, Sum_Plant_NetGenMW))
+
+```
+
+# Ozone Wrangling
+```{r}
+winter_ozone <- winter_ozone_egrid_all_df %>%
+  mutate(Season = 'Winter') %>%
+  mutate(SeasonBinary = '0')
+
+summer_ozone <- summer_ozone_egrid_all_df %>%
+  mutate(Season = 'Summer')%>%
+  mutate(SeasonBinary = '1')
+  
+all_ozone <- bind_rows(summer_ozone, winter_ozone)
+
+#Combining with tidycensus data
+all_ozone <- merge(all_ozone, combined_population_variables, by = 'CountyState')
+
+```
+
+# PM 2.5 Wrangling
+```{r}
+# NOTE - PM winter and summer have same amount of data points in winter and summer - which could be better for analysis?
+# while ozone is a bit much
+winter_PM25 <- winter_PM25_egrid_all_df %>%
+  mutate(Season = 'Winter') %>%
+  mutate(SeasonBinary = '0')
+
+summer_PM25 <- summer_PM25_egrid_all_df %>%
+  mutate(Season = 'Summer')%>%
+  mutate(SeasonBinary = '1')
+  
+all_PM25 <- bind_rows(summer_PM25, winter_PM25)
+
+#Combining with tidycensus data
+all_PM25 <- merge(all_PM25, combined_population_variables, by = 'CountyState')
+
+```
+
+# Log transforming data
+```{r}
+all_PM25 <- all_PM25 %>%
+  mutate(LogSum_Plant_NetGenMW = log10(Sum_Plant_NetGenMW))
+
+all_ozone <- all_ozone %>%
+  mutate(LogSum_Plant_NetGenMW = log10(Sum_Plant_NetGenMW))
+```
+
+some limitations... i dont think we should be using annual generation because that is the net, so its minusing the gross - net so we arent getting TOTAL electricity generation that plants is consuming thats why some are so low and some are negative... so we arent using just total generation these plants are producing :---)
+so we need to write in paper about this probably?
+
+#Identifying states with <5 observations
+```{r}
+#adding a column in the data to show state
+all_PM25_temp <- all_PM25 %>%
+  separate(CountyState, into = c("County", "State"), sep = ",\\s*")
+all_ozone_temp <- all_ozone %>%
+  separate(CountyState, into = c("County", "State"), sep = ",\\s*")
+
+all_PM25_graph <- ggplot(all_PM25_temp, aes(x = State)) +
+  geom_bar(fill = "pink") +
+  ggtitle("Count of PM2.5 Observations in each State")
+
+all_ozone_graph <- ggplot(all_ozone_temp, aes(x = State)) +
+  geom_bar(fill = "lightblue") +
+  ggtitle("Count of Ozone Observations in each State")
+
+all_PM25_graph + all_ozone_graph
+```
+
+
+
+# Exploratory graphs 
+## Ozone v. Net Gen - Trends with Seasonlity (2)
+```{r}
+# OZONE
+#by mean ozone concentration on y and net gen on x
+all_ozone_fig1<- all_ozone %>%
+  ggplot(aes(x = Sum_Plant_NetGenMW, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) #no scientific notation +
+  #scale_x_log10() +
+  labs(x = 'Mean Net Generation of all Counties (MW)', y = 'Average Ozone Concentrations (unit)',
+       title = 'Average Net Generation and \n Ozone Concentrations by County in Summer and Winter')
+all_ozone_fig1
+
+#log10 ed 
+all_ozone_fig1scaled<- all_ozone %>%
+  ggplot(aes(x = Sum_Plant_NetGenMW, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Mean Net Generation of all Counties (MW)', y = 'Average Ozone Concentrations (unit)',
+       title = 'Average Net Generation and \n Ozone Concentrations by County in Summer and Winter')
+all_ozone_fig1scaled
+
+
+```
+
+## PM 2.5 v. Net Gen - Trends with Seasonality (2)
+```{r}
+# PM 2.5 
+#by mean PM 2.5 concentration on y and net gen on x
+all_PM25_fig1<- all_PM25 %>%
+  ggplot(aes(x = Sum_Plant_NetGenMW, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  #scale_x_log10() +
+  scale_x_continuous(labels = scales::comma) #no scientific notation +
+  labs(x = 'Mean Net Generation of All Counties (MW)', y = 'Average PM 2.5 Concentrations (unit)',
+       title = 'Average Net Generation and \n PM 2.5 Concentrations by County in Summer and Winter')
+all_PM25_fig1
+
+# log 10 ed
+all_PM25_fig1scaled<- all_PM25 %>%
+  ggplot(aes(x = Sum_Plant_NetGenMW, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Mean Net Generation of All Counties (MW)', y = 'Average PM 2.5 Concentrations (unit)',
+       title = 'Average Net Generation and \n PM 2.5 Concentrations by County in Summer and Winter')
+all_PM25_fig1scaled
+```
+
+
+# Histograms - PM / Ozone Count with Seasonality (2)
+maybe perform log transformation - really just looking at ozone/pm with seasonality
+```{r}
+# ozone histogram
+ozone_histogram <- ggplot(all_ozone, aes(x = average_month_ozone_concentration, 
+                                        fill = Season)) + 
+  geom_histogram() + 
+  scale_fill_manual(values = c('orange',"blue")) + 
+  labs(x = 'Ozone Concentrations (ppm)', y = "Count",
+       title = 'Ozone Concentrations by Season') + 
+  facet_grid(.~Season) + # facets by habitat to avoid overlap 
+  theme_bw() + # removes the grey background 
+  theme(legend.position = "none") #removes legend
+
+ozone_histogram
+```
+
+```{r}
+# PM 2.5 histogram
+PM25_histogram <- ggplot(all_PM25, aes(x = average_month_PM25_concentration, 
+                                        fill = Season)) + 
+  geom_histogram() + 
+  scale_fill_manual(values = c('orange',"blue")) + 
+  labs(x = 'PM 2.5 Concentrations (ug/m3)', y = "Count",
+       title = 'PM 2.5 Concentrations by Season') + 
+  facet_grid(.~Season) + # facets by habitat to avoid overlap 
+  theme_bw() + # removes the grey background 
+  theme(legend.position = "none") #removes legend
+PM25_histogram
+```
+
+Tidy Census histograms?
+```{r}
+
+```
+
+
+# Skewness and Kurtosis for Ozone and PM - Seasonlity (4)
+```{r}
+# Ozone 
+ozonewinter_data <- all_ozone %>% filter(Season == "Winter")
+skewness(ozonewinter_data$average_month_ozone_concentration, na.rm = TRUE) #-0.8506
+kurtosis(ozonewinter_data$average_month_ozone_concentration, na.rm = TRUE) #3.5699
+
+ozonesummer_data <- all_ozone %>% filter(Season == "Summer")
+skewness(ozonesummer_data$average_month_ozone_concentration, na.rm = TRUE) #0.175
+kurtosis(ozonesummer_data$average_month_ozone_concentration, na.rm = TRUE) #2.3717
+```
+
+```{r}
+# PM 2.5
+pm25winter_data <- all_PM25 %>% filter(Season == "Winter")
+skewness(pm25winter_data$average_month_PM25_concentration, na.rm = TRUE) #-1.165
+kurtosis(pm25winter_data$average_month_PM25_concentration, na.rm = TRUE) #5.4427
+
+pm25summer_data <- all_PM25 %>% filter(Season == "Summer")
+skewness(pm25summer_data$average_month_PM25_concentration, na.rm = TRUE) #0.182
+kurtosis(pm25summer_data$average_month_PM25_concentration, na.rm = TRUE) #2.708
+```
+
+
+# Linear Regression Beginning
+
+## Define Research Questions
+
+## Examine Data
+```{r}
+# Create and examine histograms of raw values.
+(hist1_netgen <- ggplot(all_ozone, aes(x = Sum_Plant_NetGenMW)) 
+ + geom_histogram() +
+   theme_bw())
+  #SUPERRR skewed - should handle this - log transform?
+
+(hist1_netgenlogscale <- ggplot(all_ozone, aes(x = LogSum_Plant_NetGenMW)) + geom_histogram() +
+   theme_bw())
+
+(hist2_ozoneconcent <- ggplot(all_ozone, aes(x = average_month_ozone_concentration)) + 
+    geom_histogram() +
+    theme_bw())
+
+(hist3_pm25concent <- ggplot(all_PM25, aes(x = average_month_PM25_concentration)) + 
+    geom_histogram() +
+    theme_bw())
+
+# Create and examine an initial scatterplot of data.
+(scatter1_ozone <- ggplot(all_ozone, aes(x = LogSum_Plant_NetGenMW, y = average_month_ozone_concentration)) +
+    geom_point() + 
+    theme_bw())
+
+(scatter2_pm25 <- ggplot(all_PM25, aes(x = LogSum_Plant_NetGenMW, y = average_month_PM25_concentration))
+  +
+    geom_point() + 
+    theme_bw())
+
+```
+#Summary Statistics
+```{r}
+summary(combined_population_variables)
+
+#Very small percentage of Native and Pacific populations, so removing from both PM and ozone tables
+all_ozone <- all_ozone[, -c(8,10)]
+all_PM25 <- all_PM25[, -c(8,10)]
+```
+
+
+#Exploratory Graphs for Population Indicators
+## Ozone v. Population Indicators
+```{r}
+# POPULATION
+#by mean ozone concentration on y and population on x
+ozone_by_population <- all_ozone %>%
+  ggplot(aes(x = Population, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) +
+  labs(x = 'Population', y = 'Average Ozone Concentrations (unit)',
+       title = 'Population and \n Ozone Concentrations by County in Summer and Winter')
+ozone_by_population
+
+#log10 ed 
+ozone_by_population_scaled <- all_ozone %>%
+  ggplot(aes(x = Population, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Population Scaled', y = 'Average Ozone Concentrations (unit)',
+       title = 'Population Scaled and \n Ozone Concentrations by County in Summer and Winter')
+ozone_by_population_scaled
+```
+```{r}
+# PERCENT NO VEHICLE
+#by mean ozone concentration on y and percent no vehicle on x
+ozone_by_percent_no_vehicle <- all_ozone %>%
+  ggplot(aes(x = percent_no_vehicle, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) +
+  labs(x = 'Percent no Vehicle', y = 'Average Ozone Concentrations (unit)',
+       title = 'Percent no Vehicle and \n Ozone Concentrations by County in Summer and Winter')
+ozone_by_percent_no_vehicle
+
+#log10 ed 
+ozone_by_percent_no_vehicle_scaled <- all_ozone %>%
+  ggplot(aes(x = percent_no_vehicle, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Percent no Vehicle Scaled', y = 'Average Ozone Concentrations (unit)',
+       title = 'Percent no Vehicle Scaled and \n Ozone Concentrations by County in Summer and Winter')
+ozone_by_percent_no_vehicle_scaled
+```
+```{r}
+# MEDIAN INCOME
+#by mean ozone concentration on y and median income on x
+ozone_by_income <- all_ozone %>%
+  ggplot(aes(x = Median_Income, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) +
+  labs(x = 'Median Income', y = 'Average Ozone Concentrations (unit)',
+       title = 'Median Income and \n Ozone Concentrations by County in Summer and Winter')
+ozone_by_income
+
+#log10 ed 
+ozone_by_income_scaled <- all_ozone %>%
+  ggplot(aes(x = Median_Income, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Median Income Scaled', y = 'Average Ozone Concentrations (unit)',
+       title = 'Median Income Scaled and \n Ozone Concentrations by County in Summer and Winter')
+ozone_by_income_scaled
+```
+```{r}
+# HOUSING BURDEN
+#by mean ozone concentration on y and housing on x
+ozone_by_housing_burden <- all_ozone %>%
+  ggplot(aes(x = percent_housing_burden, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) +
+  labs(x = 'Percent Housing Burden', y = 'Average Ozone Concentrations (unit)',
+       title = 'Pecent Housing Burden and \n Ozone Concentrations by County in Summer and Winter')
+ozone_by_housing_burden
+
+#log10 ed 
+ozone_by_housing_burden_scaled <- all_ozone %>%
+  ggplot(aes(x = percent_housing_burden, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Percent Housing Burden Scaled', y = 'Average Ozone Concentrations (unit)',
+       title = 'Percent Housing Burden Scaled and \n Ozone Concentrations by County in Summer and Winter')
+ozone_by_housing_burden_scaled
+```
+
+#Exploratory Graphs for Population Indicators
+## PM2.5 v. Population Indicators
+```{r}
+# POPULATION
+#by mean PM25 concentration on y and population on x
+PM25_by_population <- all_PM25 %>%
+  ggplot(aes(x = Population, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) +
+  labs(x = 'Population', y = 'Average PM25 Concentrations (unit)',
+       title = 'Population and \n PM25 Concentrations by County in Summer and Winter')
+PM25_by_population
+
+#log10 ed 
+PM25_by_population_scaled <- all_PM25 %>%
+  ggplot(aes(x = Population, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Population Scaled', y = 'Average PM25 Concentrations (unit)',
+       title = 'Population Scaled and \n PM25 Concentrations by County in Summer and Winter')
+PM25_by_population_scaled
+```
+
+```{r}
+# PERCENT NO VEHICLE
+#by mean PM25 concentration on y and percent no vehicle on x
+PM25_by_percent_no_vehicle <- all_PM25 %>%
+  ggplot(aes(x = percent_no_vehicle, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) +
+  labs(x = 'Percent no Vehicle', y = 'Average PM25 Concentrations (unit)',
+       title = 'Percent no Vehicle and \n PM25 Concentrations by County in Summer and Winter')
+PM25_by_percent_no_vehicle
+
+#log10 ed 
+PM25_by_percent_no_vehicle_scaled <- all_ozone %>%
+  ggplot(aes(x = percent_no_vehicle, y = average_month_ozone_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Percent no Vehicle Scaled', y = 'Average Ozone Concentrations (unit)',
+       title = 'Percent no Vehicle Scaled and \n Ozone Concentrations by County in Summer and Winter')
+PM25_by_percent_no_vehicle_scaled
+```
+```{r}
+# MEDIAN INCOME
+#by mean PM25 concentration on y and median income on x
+PM25_by_income <- all_PM25 %>%
+  ggplot(aes(x = Median_Income, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) +
+  labs(x = 'Median Income', y = 'Average PM25 Concentrations (unit)',
+       title = 'Median Income and \n PM25 Concentrations by County in Summer and Winter')
+PM25_by_income
+
+#log10 ed 
+PM25_by_income_scaled <- all_PM25 %>%
+  ggplot(aes(x = Median_Income, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Median Income Scaled', y = 'Average PM25 Concentrations (unit)',
+       title = 'Median Income Scaled and \n PM25 Concentrations by County in Summer and Winter')
+PM25_by_income_scaled
+```
+
+```{r}
+# HOUSING BURDEN
+#by mean PM25 concentration on y and housing on x
+PM25_by_housing_burden <- all_PM25 %>%
+  ggplot(aes(x = percent_housing_burden, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_continuous(labels = scales::comma) +
+  labs(x = 'Percent Housing Burden', y = 'Average PM25 Concentrations (unit)',
+       title = 'Pecent Housing Burden and \n PM25 Concentrations by County in Summer and Winter')
+PM25_by_housing_burden
+
+#log10 ed 
+PM25_by_housing_burden_scaled <- all_PM25 %>%
+  ggplot(aes(x = percent_housing_burden, y = average_month_PM25_concentration, color = Season)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_x_log10() +
+  labs(x = 'Percent Housing Burden Scaled', y = 'Average PM25 Concentrations (unit)',
+       title = 'Percent Housing Burden Scaled and \n PM25 Concentrations by County in Summer and Winter')
+PM25_by_housing_burden_scaled
+```
+
+```{r}
+write.csv(all_ozone, file = "ALL_OZONE_FINAL_MAX.csv", row.names = FALSE)
+write.csv(all_PM25, file = "ALL_PM25_FINAL_MAX.csv", row.names = FALSE)
+```
+
+
+```{r}
+summary(all_ozone_df)
+sd(all_ozone_df$Sum_Plant_NetGenMW)
+sd(all_ozone_df$average_month_ozone_concentration)
+sd(all_ozone_df$Median_Income)
+sd(all_ozone_df$percent_white)
+sd(all_ozone_df$percent_black)
+sd(all_ozone_df$percent_asian)
+sd(all_ozone_df$percent_housing_burden)
+sd(all_ozone_df$percent_no_vehicle)
+sd(all_ozone_df$Population)
+
+
+all_pm25_df
+
+```
+
