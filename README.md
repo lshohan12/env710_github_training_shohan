@@ -1,4 +1,5 @@
-# TITLE
+# Exploring Relationships between Criteria Air Pollutants, Annual Power Plant Generation, and Socioeconomic Indicators in the Southeast
+
 
 ## Summary
 
@@ -25,7 +26,21 @@ Weilin Wang:
 
 ## Folder structure, file formats, and naming conventions 
 
+### Folders:
 <Datafiles: Contains data used in this project. Contains: eGRID 2022 excel data file, all ozone and PM 2.5 data files for all seven states in the year 2022.>
 
 
+<Archive: Exploratory files that were not used for final analysis>
+
+### RMD Files:
+
+<PM_Stat_Figures and OZONE_Stat_Figures: These are exploratory files analyzing the PM, Ozone, and EGRID data into exploratory graphs and cleaning the data for analysis.>
+
+<Tidycensus: Contains all data and wrangling for the Tidycensus R package. Pleaser run this one before running the following RMDs.>
+
+<OzonePMCombinedFinal: This contains the cleaned and combined data for PM, Ozone, and eGRID into dataframes for analysis.>
+
+<FinalAnlysis: This data frame reads in the combined csv files of PM and Ozone for both seasons and combines them with our tidycensus dataframe. Exploratory graphs and analysis for all variables is done on this file as well as descriptive statisitics on the variables.>
+
+<multi_lvl_models: Four multi-level models are conducted on this file, two four ozone and two four PM 2.5. QQPlots, standardized residuals/fitted values, and AIC comparisons were conducted to show model comparison. Summary results of all models with p-value and beta values are shown here. >
 
